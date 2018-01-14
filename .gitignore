@@ -104,3 +104,4 @@ ENV/
 ThunderBorg.py
 UltraBorg.py
 
+.remote-sync.json
