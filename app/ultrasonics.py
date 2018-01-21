@@ -18,6 +18,7 @@ class Ultrasonics():
 
     def __init__(self, utraborgInstance):
         self.ub = utraborgInstance
+        self.frontPrevious = self.ub.GetDistance2()
         # Set the board up (checks the board is connected)
 
     def read(self):
@@ -32,20 +33,20 @@ class Ultrasonics():
         self.left = int(self.left)
         self.back = int(self.back)
         # Display the readings
-        if self.right == 0:
-            print '#1 (Right) No reading'
-        else:
-            print '#1 (Right) % 4d mm' % (self.right)
-        if self.front == 0:
-            print '#2 (Front) No reading'
-        else:
-            print '#2 (Front) % 4d mm' % (self.front)
-        if self.left == 0:
-            print '#3 (Left) No reading'
-        else:
-            print '#3 (Left) % 4d mm' % (self.left)
-        if self.back == 0:
-            print '#4 (Back) No reading'
-        else:
-            print '#4 (Back) % 4d mm' % (self.back)
-        print
+        #if self.right == 0:
+            #print '#1 (Right) No reading'
+        #else:
+            #print '#1 (Right) % 4d mm' % (self.right)
+        # if self.front == 0:
+        #     print '#2 (Front) No reading'
+        # else:
+        #     print '#2 (Front) % 4d mm' % (self.front)
+        #if self.left == 0:
+            #print '#3 (Left) No reading'
+        #else:
+            #print '#3 (Left)  % 4d mm' % (self.left)
+        #if self.back == 0:
+            #print '#4 (Back) No reading'
+        #else:
+            #print '#4 (Back)  % 4d mm' % (self.back)
+        #print
