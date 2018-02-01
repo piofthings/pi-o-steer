@@ -17,9 +17,14 @@ try:
     while True:
         # Read all four ultrasonic values
         usm1 = UB.GetDistance1()
-        usm2 = UB.GetDistance2()
+        time.sleep(0.05)
         usm3 = UB.GetDistance3()
+        time.sleep(0.05)
+        usm2 = UB.GetDistance2()
+        time.sleep(0.05)
+
         usm4 = UB.GetDistance4()
+        time.sleep(0.05)
         # Convert to the nearest millimeter
         usm1 = int(usm1)
         usm2 = int(usm2)
@@ -27,21 +32,21 @@ try:
         usm4 = int(usm4)
         # Display the readings
         if usm1 == 0:
-            print '#1 No reading'
+            print 'Right No reading'
         else:
-            print '#1 % 4d mm' % (usm1)
+            print 'Right % 4d mm' % (usm1)
         if usm2 == 0:
-            print '#2 No reading'
+            print 'Front No reading'
         else:
-            print '#2 % 4d mm' % (usm2)
+            print 'Front % 4d mm' % (usm2)
         if usm3 == 0:
-            print '#3 No reading'
+            print 'Left No reading'
         else:
-            print '#3 % 4d mm' % (usm3)
+            print 'Left % 4d mm' % (usm3)
         if usm4 == 0:
-            print '#4 No reading'
+            print 'Back No reading'
         else:
-            print '#4 % 4d mm' % (usm4)
+            print 'Back % 4d mm' % (usm4)
         print
         # Wait between readings
         time.sleep(.1)

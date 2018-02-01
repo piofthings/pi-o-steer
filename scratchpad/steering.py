@@ -59,7 +59,7 @@ try:
 		print 'Servo going ' + direction + ' at' + repr(servo4)
         	# Set our new servo positions
 	        UB.SetServoPosition4(servo4)
-		UB.SetServoPosition3(servo4*-1)
+            UB.SetServoPosition3(servo4*-1)
 	        # Wait until the next step
 	        time.sleep(stepDelay)
 except KeyboardInterrupt:

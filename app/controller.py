@@ -3,6 +3,7 @@
 
 import time
 import sys
+import traceback
 
 from references import UltraBorg
 from references import ThunderBorg
@@ -20,7 +21,7 @@ class Controller():
         self.tb.Init()
         self.tickSpeed = .08
         self.us = Ultrasonics(self.ub)
-        self.motors = Motors(self.tb, self.tickSpeed)
+        self.motors = Motors(self.tb, self.ub, self.tickSpeed)
     def run(self):
         try:
             while True:
@@ -29,13 +30,14 @@ class Controller():
                 time.sleep(self.tickSpeed)
         except KeyboardInterrupt:
             # User has pressed CTRL+C
-            print 'Done'
+            print ('Done')
             if(self.motors):
                 self.motors.shutdown()
 
         except Exception as e:
+            tb = traceback.format_exc()
             e = sys.exc_info()[0]
-            print 'Error: %s' % str(e)
+            print( tb)
             if(self.motors):
                 self.motors.shutdown()
 def main():
