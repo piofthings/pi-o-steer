@@ -27,7 +27,7 @@ class Controller():
             while True:
                 self.us.read()
                 self.motors.move(self.us.right, self.us.front, self.us.left, self.us.back)
-                time.sleep(self.tickSpeed)
+                #time.sleep(self.tickSpeed)
         except KeyboardInterrupt:
             # User has pressed CTRL+C
             print ('Done')

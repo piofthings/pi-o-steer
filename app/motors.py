@@ -22,6 +22,7 @@ class Motors():
     sideRatio = 0.0
     prevRatio = -1.0
     going = 'straight'
+    minRight = 80
 
     def __init__(self, thunderBorgInstance, ultraBorgInstance, tickSpeed):
         self.tb = thunderBorgInstance
@@ -66,7 +67,7 @@ class Motors():
         else:
             self.maxPower = self.voltageOut / float(self.voltageIn)
 
-        self.speed = 0.5 #self.maxPower;
+        self.speed = 0.8 #self.maxPower;
 
         self.tb.MotorsOff()
 
@@ -109,31 +110,31 @@ class Motors():
 
     def steer (self, left, right, front, back):
         if(self.prevRight == -1):
-            self.prevRight = right
+            self.prevRight = right/left
             self.prevRatio = 1
         else :
             print (self.prevRight)
             print (right)
-            self.sideRatio =  right/self.prevRight;
+            self.sideRatio =  right/left;
             if (self.sideRatio < self.prevRatio): #left more than right go left
                 self.going = 'right'
                 if self.steeringPosition > 0 :
-                    self.steeringPosition = -0.05
+                    self.steeringPosition = -0.08
                 else:
-                    self.steeringPosition = self.steeringPosition - 0.05
+                    self.steeringPosition = self.steeringPosition - 0.08
             elif (self.sideRatio > self.prevRatio): #right more than left go right
                 self.going = 'left'
                 if self.steeringPosition < 0 :
-                    self.steeringPosition = 0.05
+                    self.steeringPosition = 0.08
                 else:
-                    self.steeringPosition = self.steeringPosition + 0.05
+                    self.steeringPosition = self.steeringPosition + 0.08
             else:
                 self.steeringPosition = 0.0
 
             self.prevRatio = self.sideRatio
 
             self.ub.SetServoPosition4(self.steeringPosition)
-            #self.prevRight = right
+            #self.prevRatio = self.prevRatio
 
     def shutdown(self):
         self.tb.MotorsOff()
