@@ -1,10 +1,11 @@
-# pi-o-steer
+# Team Pi-o-Steer
 
-##Code for a #PiWars 2018 robot
+## Code for a #PiWars 2018 robot
 
 Very much a work in progress... nothing really works at the moment.
 
 Includes parts of code provided by [PiBorg](https://piborg.org)
+
 
 LICENSE
 

@@ -5,6 +5,7 @@
 from references import UltraBorg
 import time
 
+
 class Position(object):
     def __init__(self, jsonDef):
         s = json.loads(jsonDef)
@@ -13,8 +14,13 @@ class Position(object):
         self.front = -1 if 'front' not in s else s['front']
         self.back = -1 if 'back' not in s else s['back']
 
+
 class Ultrasonics():
     ub = None     # Create a new UltraBorg object
+    left = 0.0
+    right = 0.0
+    front = 0.0
+    back = 0.0
 
     def __init__(self, utraborgInstance):
         self.ub = utraborgInstance
@@ -36,21 +42,19 @@ class Ultrasonics():
         self.front = int(self.front)
         self.left = int(self.left)
         self.back = int(self.back)
-        # Display the readings
-        #if self.right == 0:
-            #print '#1 (Right) No reading'
-        #else:
-            #print '#1 (Right) % 4d mm' % (self.right)
-        # if self.front == 0:
-        #     print '#2 (Front) No reading'
-        # else:
-        #     print '#2 (Front) % 4d mm' % (self.front)
-        #if self.left == 0:
-            #print '#3 (Left) No reading'
-        #else:
-            #print '#3 (Left)  % 4d mm' % (self.left)
-        #if self.back == 0:
-            #print '#4 (Back) No reading'
-        #else:
-            #print '#4 (Back)  % 4d mm' % (self.back)
-        #print
+
+    def readRight(self):
+        self.right = self.ub.GetDistance1()
+        return self.right
+
+    def readLeft(self):
+        self.left = self.ub.GetDistance3()
+        return self.left
+
+    def readFront(self):
+        self.front = self.ub.GetDistance2()
+        return self.left
+
+    def readBack(self):
+        self.back = self.ub.GetDistance4()
+        return self.back

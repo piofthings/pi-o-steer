@@ -48,7 +48,7 @@ try:
 	        servo4 += rateServo4
         	# Check if any of them are too large, if so wrap to the over end
 	        if servo4 > servoMax:
-        	    #servo4 -= (servoMax - servoMin)
+        	    # servo4 -= (servoMax - servoMin)
 		    direction = 'right'
 	else:
 		servo4 -= rateServo4
@@ -59,6 +59,7 @@ try:
 		print 'Servo going ' + direction + ' at' + repr(servo4)
         	# Set our new servo positions
 	        UB.SetServoPosition4(servo4)
+
             UB.SetServoPosition3(servo4*-1)
 	        # Wait until the next step
 	        time.sleep(stepDelay)
