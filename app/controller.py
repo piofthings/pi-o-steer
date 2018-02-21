@@ -19,7 +19,7 @@ class Controller():
     def __init__(self):
         self.ub.Init()
         self.tb.Init()
-        self.tickSpeed = .05
+        self.tickSpeed = 0.01
         self.us = Ultrasonics(self.ub)
         self.motors = Motors(self.tb, self.ub, self.tickSpeed)
 
@@ -36,16 +36,15 @@ class Controller():
                                  self.us.left, self.us.back)
                 time.sleep(self.tickSpeed)
 
-                front = self.us.readFront()
-                self.motors.move(self.us.right, self.us.front,
-                                 self.us.left, self.us.back)
-                time.sleep(self.tickSpeed)
+                # front = self.us.readFront()
+                # self.motors.move(self.us.right, self.us.front,
+                #                  self.us.left, self.us.back)
+                # time.sleep(self.tickSpeed)
 
-                back = self.us.readBack()
-                self.motors.move(self.us.right, self.us.front,
-                                 self.us.left, self.us.back)
-
-                time.sleep(self.tickSpeed)
+                # back = self.us.readBack()
+                # self.motors.move(self.us.right, self.us.front,
+                #                  self.us.left, self.us.back)
+                # time.sleep(self.tickSpeed)
         except KeyboardInterrupt:
             # User has pressed CTRL+C
             print('Done')

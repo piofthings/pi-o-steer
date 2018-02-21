@@ -29,40 +29,30 @@ try:
     UB.SetServoPosition4(servo4)
     # Wait a while to be sure the servos have caught up
     time.sleep(startupDelay)
-#    print 'Sweep to start position'
-#    while servo4 > servoMin:
-        # Reduce the servo positions
-#        servo4 -= rateStart
-        # Check if they are too small
-#        if servo4 < servoMin:
-#            servo4 = servoMin
-        # Set our new servo positions
-#        UB.SetServoPosition4(servo4)
-        # Wait until the next step
-#        time.sleep(stepDelay)
+
     print 'Sweep all servos through the range'
-    direction = 'left'
+    direction = 'right'
     while True:
-	if direction == 'left':
-        	# Increase the servo positions at separate rates
-	        servo4 += rateServo4
-        	# Check if any of them are too large, if so wrap to the over end
-	        if servo4 > servoMax:
-        	    # servo4 -= (servoMax - servoMin)
-		    direction = 'right'
-	else:
-		servo4 -= rateServo4
-		if servo4 < servoMin:
-		    direction = 'left'
+        if direction == 'right':
+            # Increase the servo positions at separate rates
+            servo4 += rateServo4
+            # Check if any of them are too large, if so wrap to the over end
+            if servo4 > servoMax:
+                # servo4 -= (servoMax - servoMin)
+                direction = 'left'
+        else:
+            servo4 -= rateServo4
+            if servo4 < servoMin:
+                direction = 'right'
 
-	if (servo4 < servoMax) & (servo4 > servoMin):
-		print 'Servo going ' + direction + ' at' + repr(servo4)
-        	# Set our new servo positions
-	        UB.SetServoPosition4(servo4)
+        if (servo4 < servoMax) & (servo4 > servoMin):
+            print 'Servo going ' + direction + ' at' + repr(servo4)
+            # Set our new servo positions
+            UB.SetServoPosition4(servo4)
 
-            UB.SetServoPosition3(servo4*-1)
-	        # Wait until the next step
-	        time.sleep(stepDelay)
+            UB.SetServoPosition3(servo4 * -1)
+            # Wait until the next step
+            time.sleep(stepDelay)
 except KeyboardInterrupt:
     # User has pressed CTRL+C
     print 'Done'

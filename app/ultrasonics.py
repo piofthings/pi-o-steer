@@ -29,13 +29,13 @@ class Ultrasonics():
 
     def read(self):
         # Read all four ultrasonic values
-        self.right = self.ub.GetDistance1()
+        self.right = self.ub.GetRawDistance1()
         time.sleep(0.05)
-        self.front = self.ub.GetDistance2()
+        self.front = self.ub.GetRawDistance1()
         time.sleep(0.05)
-        self.left = self.ub.GetDistance3()
+        self.left = self.ub.GetRawDistance1()
         time.sleep(0.05)
-        self.back = self.ub.GetDistance4()
+        self.back = self.ub.GetRawDistance1()
         time.sleep(0.05)
         # Convert to the nearest millimeter
         self.right = int(self.right)
@@ -44,17 +44,17 @@ class Ultrasonics():
         self.back = int(self.back)
 
     def readRight(self):
-        self.right = self.ub.GetDistance1()
+        self.right = self.ub.GetRawDistance1()
         return self.right
 
     def readLeft(self):
-        self.left = self.ub.GetDistance3()
+        self.left = self.ub.GetRwaDistance3()
         return self.left
 
     def readFront(self):
-        self.front = self.ub.GetDistance2()
+        self.front = self.ub.GetRawDistance2()
         return self.left
 
     def readBack(self):
-        self.back = self.ub.GetDistance4()
+        self.back = self.ub.GetRawDistance4()
         return self.back

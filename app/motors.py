@@ -21,10 +21,11 @@ class Motors():
     left = 1
     right = 1
     prevRight = -1
-    sideRatio = 0.0
-    prevRatio = -1.0
+    sideRatio = 1.0
+    prevRatio = 1.0
     going = 'straight'
     minRight = 80
+    steeringDefault = 0.08
 
     def __init__(self, thunderBorgInstance, ultraBorgInstance, tickSpeed):
         self.tb = thunderBorgInstance
@@ -38,7 +39,7 @@ class Motors():
         self.ub.SetServoPosition4(self.steeringPosition)
 
         self.teleLogger.info(
-            'left, front, right, back, forwardSpeed, direction, degree, ratio')
+            'left, front, right, back, distanceMoved, forwardSpeed, direction, steering position, ratio')
         if not self.tb.foundChip:
             boards = ThunderBorg.ScanForThunderBorg()
             if len(boards) == 0:
@@ -49,9 +50,9 @@ class Motors():
                     self.tb.i2cAddress))
                 for board in boards:
                     print ' %02X (%d)' % (board, board)
-                print(
+                self.logger.info(
                     'If you need to change the I2C address change the setup line so it is correct, e.g.')
-                print('self.tb.i2cAddress = 0x%02X' % (boards[0]))
+                self.logger.info('self.tb.i2cAddress = 0x%02X' % (boards[0]))
             sys.exit()
         # Ensure the communications failsafe has been enabled!
         failsafe = False
@@ -61,8 +62,8 @@ class Motors():
             if failsafe:
                 break
         if not failsafe:
-            print('Board %02X failed to report in failsafe mode!' %
-                  (self.tb.i2cAddress))
+            self.logger.info('Board %02X failed to report in failsafe mode!' %
+                             (self.tb.i2cAddress))
             sys.exit()
 
         self.driveRight = 1.0
@@ -79,9 +80,13 @@ class Motors():
         else:
             self.maxPower = self.voltageOut / float(self.voltageIn)
 
-        self.speed = 0.8  # self.maxPower;
+        self.speed = 0.4  # self.maxPower;
 
         self.tb.MotorsOff()
+        self.center()
+
+    def center(self):
+        self.ub.SetServoPosition4(0)
 
     def move(self, right, front, left, back):
         distanceMoved = -1
@@ -100,7 +105,7 @@ class Motors():
                         self.speed = 0
             self.frontPrev = front
         else:
-            print 'Distance moved was not read'
+            self.logger.info('Distance moved was not read')
 
         if (right != 0):
             self.steer(left, right, front, back)
@@ -110,44 +115,56 @@ class Motors():
 
         if (self.speed != 0):
             self.teleLogger.info(
-                '%(left)f, %(front)f, %(right)f, %(back)f, %(forwardSpeed)f, %(direction)s, %(degree)f, %(ratio)f', {
+                '%(left)f, %(front)f, %(right)f, %(back)f, %(distanceMoved)f, %(forwardSpeed)f, %(direction)s, %(degree)f, %(ratio)f', {
                     "left": left,
                     "front": front,
-                    "back": back,
                     "right": right,
+                    "back": back,
+                    "distanceMoved": distanceMoved,
                     "forwardSpeed": self.forwardSpeed,
                     "direction": self.going,
                     "degree": self.steeringPosition,
                     "ratio": self.sideRatio
                 })
 
+    def adjustLeft(self, factor):
+        if(self.going == 'right'):
+            self.steeringPosition = -1 * self.steeringDefault * factor
+        elif(self.going == 'left'):
+            self.steeringPosition = self.steeringPosition - \
+                (self.steeringDefault * factor)
+        self.going = 'left'
+
+    def adjustRight(self, factor):
+        if(self.going == 'left'):
+            self.steeringPosition = (self.steeringDefault * factor)
+        elif(self.going == 'right'):
+            self.steeringPosition = self.steeringPosition + \
+                (self.steeringDefault * factor)
+        self.going = 'right'
+
     def steer(self, left, right, front, back):
-        if(self.prevRight == -1):
-            self.prevRight = right / left
-            self.prevRatio = 1
-        else:
-            print(self.prevRight)
-            print(right)
-            self.sideRatio = right / left
-            if (self.sideRatio < self.prevRatio):  # left more than right go left
-                self.going = 'right'
-                if self.steeringPosition > 0:
-                    self.steeringPosition = -0.08
-                else:
-                    self.steeringPosition = self.steeringPosition - 0.08
-            elif (self.sideRatio > self.prevRatio):  # right more than left go right
-                self.going = 'left'
-                if self.steeringPosition < 0:
-                    self.steeringPosition = 0.08
-                else:
-                    self.steeringPosition = self.steeringPosition + 0.08
+        self.sideRatio = right / left
+        if (self.sideRatio != 1):
+            heading = 1 - self.sideRatio
+            prevHeading = 1 - self.prevRatio
+            if (self.sideRatio < 1):
+                # RHS distance less than LHS distance
+                # so go should go Left
+                # self.adjustLeft(1)
+                print("Left")
+            elif (self.sideRatio > 1):
+                # LHS distance less than RHS distance
+                # so go Right
+                # self.adjustRight(1)
+                print("RIght")
             else:
                 self.steeringPosition = 0.0
+        else:
+            self.steeringPosition = 0.0
 
-            self.prevRatio = self.sideRatio
-
-            self.ub.SetServoPosition4(self.steeringPosition)
-            # self.prevRatio = self.prevRatio
+        self.prevRatio = self.sideRatio
+        self.ub.SetServoPosition4(self.steeringPosition)
 
     def shutdown(self):
         self.tb.MotorsOff()
