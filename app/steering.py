@@ -1,10 +1,10 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # Original Source: https://github.com/piborg/MoveMyServo
 
 # Import the libraries we need
 from __future__ import division
 import time
-from references import ThunderBorg
+from references import ThunderBorg3
 from datetime import datetime
 from telemetry import Telemetry
 

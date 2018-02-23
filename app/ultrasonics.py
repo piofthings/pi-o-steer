@@ -1,8 +1,8 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # UltraBorg library by PiBorg: https://github.com/piborg/ultraborg-web
 
-from references import UltraBorg
+from references import UltraBorg3
 import time
 
 
@@ -48,7 +48,7 @@ class Ultrasonics():
         return self.right
 
     def readLeft(self):
-        self.left = self.ub.GetRwaDistance3()
+        self.left = self.ub.GetRawDistance3()
         return self.left
 
     def readFront(self):

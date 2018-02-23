@@ -17,7 +17,7 @@ class Telemetry(object):
         if not logger.handlers:
             # usually I keep the LOGGING_DIR defined in some global settings file
             fileName = str(self.runId) + self.name + "." + ext
-            print fileName
+            print('Logging telemetry at' + fileName)
             file_name = os.path.join("./logs", fileName)
             handler = logging.FileHandler(file_name)
             formatter = logging.Formatter(

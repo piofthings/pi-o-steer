@@ -1,20 +1,20 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # Original Source: https://github.com/piborg/MoveMyServo
 
 import time
 import sys
 import traceback
 
-from references import UltraBorg
-from references import ThunderBorg
+from references import UltraBorg3
+from references import ThunderBorg3
 
 from ultrasonics import Ultrasonics
 from motors import Motors
 
 
 class Controller():
-    ub = UltraBorg.UltraBorg()
-    tb = ThunderBorg.ThunderBorg()
+    ub = UltraBorg3.UltraBorg()
+    tb = ThunderBorg3.ThunderBorg()
 
     def __init__(self):
         self.ub.Init()

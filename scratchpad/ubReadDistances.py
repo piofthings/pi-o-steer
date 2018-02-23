@@ -1,10 +1,10 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # coding: latin-1
 
 # Original Source: http://piborg.org
 
 # Import the libraries we need
-import UltraBorg
+import UltraBorg3
 import time
 
 # Start the UltraBorg
