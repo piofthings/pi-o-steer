@@ -26,6 +26,7 @@ class Motors():
     going = 'straight'
     minRight = 80
     steeringDefault = 0.08
+    distanceMoved = 0
 
     def __init__(self, thunderBorgInstance, ultraBorgInstance, tickSpeed):
         self.tb = thunderBorgInstance
@@ -34,12 +35,9 @@ class Motors():
         self.safeDistance = 500  # mm
         self.steeringPosition = 0.0
         self.logger = Telemetry(self.__class__.__name__, "log").get()
-        self.teleLogger = Telemetry("telemetry", "csv").get()
 
         self.ub.SetServoPosition4(self.steeringPosition)
 
-        self.teleLogger.info(
-            'left, front, right, back, distanceMoved, forwardSpeed, direction, steering position, ratio')
         if not self.tb.foundChip:
             boards = ThunderBorg.ScanForThunderBorg()
             if len(boards) == 0:
@@ -70,9 +68,9 @@ class Motors():
         self.driveLeft = 1.0
         # Power settings
         # Total battery voltage to the ThunderBorg
-        self.voltageIn = 1.2 * 10
+        self.voltageIn = 3.7 * 4
         # Maximum motor voltage, we limit it to 95% to allow the RPi to get uninterrupted power
-        self.voltageOut = 12.0 * 0.95
+        self.voltageOut = self.voltageIn * 0.95
 
         # Setup the power limits
         if self.voltageOut > self.voltageIn:
@@ -80,7 +78,7 @@ class Motors():
         else:
             self.maxPower = self.voltageOut / float(self.voltageIn)
 
-        self.speed = 0.4  # self.maxPower;
+        self.speed = self.maxPower
 
         self.tb.MotorsOff()
         self.center()
@@ -88,7 +86,7 @@ class Motors():
     def center(self):
         self.ub.SetServoPosition4(0)
 
-    def move(self, right, front, left, back):
+    def move(self, left, right, front, back):
         distanceMoved = -1
         if (front != 'No reading'):
             if (self.frontPrev != 0):
@@ -109,20 +107,6 @@ class Motors():
 
         self.tb.SetMotor1(self.driveRight * self.speed)
         self.tb.SetMotor2(self.driveLeft * self.speed)
-
-        if (self.speed != 0):
-            self.teleLogger.info(
-                '%(left)f, %(front)f, %(right)f, %(back)f, %(distanceMoved)f, %(forwardSpeed)f, %(direction)s, %(degree)f, %(ratio)f', {
-                    "left": left,
-                    "front": front,
-                    "right": right,
-                    "back": back,
-                    "distanceMoved": distanceMoved,
-                    "forwardSpeed": self.forwardSpeed,
-                    "direction": self.going,
-                    "degree": self.steeringPosition,
-                    "ratio": self.sideRatio
-                })
 
     def shutdown(self):
         self.tb.MotorsOff()

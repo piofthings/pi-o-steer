@@ -16,14 +16,14 @@ print('Press CTRL+C to finish')
 try:
     while True:
         # Read all four ultrasonic values
-        usm1 = UB.GetDistance1()
+        usm1 = UB.GetRawDistance1()
         time.sleep(0.08)
-        usm3 = UB.GetDistance3()
+        usm3 = UB.GetRawDistance3()
         time.sleep(0.08)
-        usm2 = UB.GetDistance2()
+        usm2 = UB.GetRawDistance2()
         time.sleep(0.08)
 
-        usm4 = UB.GetDistance4()
+        usm4 = UB.GetRawDistance4()
         time.sleep(0.08)
         # Convert to the nearest millimeter
         usm1 = int(usm1)
