@@ -4,6 +4,7 @@
 # Import the libraries we need
 from __future__ import division
 import time
+import math
 # from references import ThunderBorg3
 # from references import UltraBorg3
 from datetime import datetime
@@ -16,7 +17,9 @@ class Steering():
     __prevRight = 0
     __left = 0
     __right = 0
-
+    __minRight = 150
+    __minLeft = 150
+    __queue = []
     steeringDefault = 0
 
     def __init__(self, thunderBorgInstance, ultraBorgInstance, tickSpeed):
@@ -40,20 +43,29 @@ class Steering():
         self.ub.SetServoPosition4(self.steeringPosition)
 
     def steer(self, left, right, front, back):
-        self.sideRatio = abs(right - left)
-        if ((self.sideRatio != 0)):
+        if(left < self.__minLeft):
+            left = self.__minLeft
+        if(right < self.__minRight):
+            right = self.__minRight
+        try:
+            factor = math.log(abs(right - left), 10)
+        except Exception as e:
+            factor = 0
+
+        self.sideRatio = right / left
+        if ((self.sideRatio != 1)):
             if (left > right):  # and (abs(self.__prevLeft - left) > 0.5):
                 # RHS distance less than LHS distance
                 # so should go Left
                 self.going = 'left'
-                self.__adjustLeft(1)
+                self.__adjustLeft(factor)
                 self.__prevLeft = left
                 self.__prevRight = right
             elif (right > left):  # and (abs(self.__prevLeft - left) > 0.5)):
                 # LHS distance less than RHS distance
                 # so go Right
                 self.going = 'right'
-                self.__adjustRight(1)
+                self.__adjustRight(factor)
                 self.__prevLeft = left
                 self.__prevRight = right
             else:
