@@ -1,8 +1,8 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # Original Source: https://github.com/piborg/MoveMyServo
 
 # Import the libraries we need
-import UltraBorg3
+import UltraBorg
 import time
 
 # Settings

@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # coding: Latin-1
 
 # Original Source: https://piborg.org
@@ -25,7 +25,7 @@ if not TB.foundChip:
         print 'No ThunderBorg at address %02X, but we did find boards:' % (TB.i2cAddress)
         for board in boards:
             print '    %02X (%d)' % (board, board)
-        print 'If you need to change the Iï¿½C address change the setup line so it is correct, e.g.'
+        print 'If you need to change the I²C address change the setup line so it is correct, e.g.'
         print 'TB.i2cAddress = 0x%02X' % (boards[0])
     sys.exit()
 # Ensure the communications failsafe has been enabled!

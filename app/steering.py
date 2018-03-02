@@ -5,8 +5,6 @@
 from __future__ import division
 import time
 import math
-# from references import ThunderBorg3
-# from references import UltraBorg3
 from datetime import datetime
 from telemetry import Telemetry
 
