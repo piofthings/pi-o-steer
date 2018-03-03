@@ -2,13 +2,14 @@
 
 # Import the libraries we need
 import sys
-sys.path.insert(0, "./references/pixy")
+import time
+import math
 
-#from references.pixy import pixy_init
+sys.path.insert(0, "./references/pixy")
 from pixy import *
 from ctypes import *
-import time
 from references import UltraBorg3
+from telemetry import Telemetry
 
 
 class Blocks (Structure):
@@ -28,6 +29,11 @@ class Vision():
         super(Vision, self).__init__()
         self.__steering = steering
         self.__ultrasonics = ultrasonics
+        self.__logger = Telemetry(self.__class__.__name__, "csv").get()
+        self.__logger.info(
+            'Block Type, Signature, X, Y, Width, Height, Size, Angle, Distance')
+        self.__objectHeight = 46  # mm
+        self.__focalLength = 2.4  # mm
 
     def watch(self):
         try:
@@ -36,7 +42,6 @@ class Vision():
 
             blocks = BlockArray(100)
             frame = 0
-
             # Wait for blocks #
             while 1:
                 count = pixy_get_blocks(100, blocks)
@@ -45,9 +50,21 @@ class Vision():
                     print('frame %3d:' % (frame))
                     frame = frame + 1
                     for index in range(0, count):
-                        print('[BLOCK_TYPE=%d SIG=%d X=%3d Y=%3d WIDTH=%3d HEIGHT=%3d]' % (
-                            blocks[index].type, blocks[index].signature, blocks[index].x, blocks[index].y, blocks[index].width, blocks[index].height))
+                        btype = blocks[index].type
+                        bsign = blocks[index].signature
+                        bx = blocks[index].x
+                        by = blocks[index].y
+                        bwidt = blocks[index].width
+                        bheig = blocks[index].height
+                        bsize = bwidt * bheig
+                        angle = blocks[index].angle
+                        bdist = (self.__objectHeight *
+                                 self.__focalLength) / bheig
 
+                        strOp = ('%d, %d, %d, %3d, %3d, %3d, %3d, %3d, %3d, %3d' % (
+                            frame, btype, bsign, bx, by, bwidt, bheig, bsize, angle, bdist))
+                        print(strOp)
+                        self.__logger.info(strOp)
         except KeyboardInterrupt:
             raise
         except:
