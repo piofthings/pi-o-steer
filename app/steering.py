@@ -19,6 +19,8 @@ class Steering():
     __minLeft = 150
     __queue = []
     steeringDefault = 0
+    __servoMin = -0.90                 # Smallest servo position to use
+    __servoMax = +0.90
 
     def __init__(self, thunderBorgInstance, ultraBorgInstance, tickSpeed):
         self.tb = thunderBorgInstance
@@ -39,6 +41,19 @@ class Steering():
     def reset(self):
         self.steeringPosition = self.steeringDefault
         self.ub.SetServoPosition4(self.steeringPosition)
+
+    def steerRight(self, factor):
+        self.__adjustRight(factor)
+        self.ub.SetServoPosition4(self.steeringPosition)
+
+    def steerLeft(self, factor):
+        self.__adjustLeft(factor)
+        self.ub.SetServoPosition4(self.steeringPosition)
+
+    def steerAbsolute(self, value):
+        if (value >= self.__servoMin and value <= self.__servoMax):
+            self.steeringPosition = value
+            self.ub.SetServoPosition4(self.steeringPosition)
 
     def steer(self, left, right, front, back):
         if(left < self.__minLeft):

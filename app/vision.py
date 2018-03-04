@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 # Import the libraries we need
+from __future__ import division
 import sys
 import time
 import math
@@ -31,7 +32,7 @@ class Vision():
         self.__ultrasonics = ultrasonics
         self.__logger = Telemetry(self.__class__.__name__, "csv").get()
         self.__logger.info(
-            'Block Type, Signature, X, Y, Width, Height, Size, Angle, Distance')
+            'Frame, Block Type, Signature, X, Y, Width, Height, Size, Angle, Distance, Factor')
         self.__objectHeight = 46  # mm
         self.__focalLength = 2.4  # mm
 
@@ -47,7 +48,7 @@ class Vision():
                 count = pixy_get_blocks(100, blocks)
                 if count > 0:
                     # Blocks found #
-                    print('frame %3d:' % (frame))
+                    #print('frame %f:' % (frame))
                     frame = frame + 1
                     for index in range(0, count):
                         btype = blocks[index].type
@@ -60,11 +61,21 @@ class Vision():
                         angle = blocks[index].angle
                         bdist = (self.__objectHeight *
                                  self.__focalLength) / bheig
+                        factor = 0
 
-                        strOp = ('%d, %d, %d, %3d, %3d, %3d, %3d, %3d, %3d, %3d' % (
-                            frame, btype, bsign, bx, by, bwidt, bheig, bsize, angle, bdist))
-                        print(strOp)
+                        if(bx < 180):
+                            factor = -1 * (0.9 / 180) * abs(180 - bx)
+                            self.__steering.steerAbsolute(factor)
+                        elif(bx > 180):
+                            factor = (0.9 / 180) * abs(180 - bx)
+                            self.__steering.steerAbsolute(factor)
+                        else:
+                            self.__steering.reset()
+
+                        strOp = ('%d, %d, %d, %f, %f, %f, %f, %f, %f, %f, %f' % (
+                            frame, btype, bsign, bx, by, bwidt, bheig, bsize, angle, bdist, factor))
                         self.__logger.info(strOp)
+
         except KeyboardInterrupt:
             raise
         except:
