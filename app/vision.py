@@ -62,15 +62,15 @@ class Vision():
                         bdist = (self.__objectHeight *
                                  self.__focalLength) / bheig
                         factor = 0
-
-                        if(bx < 180):
-                            factor = -1 * (0.9 / 180) * abs(180 - bx)
-                            self.__steering.steerAbsolute(factor)
-                        elif(bx > 180):
-                            factor = (0.9 / 180) * abs(180 - bx)
-                            self.__steering.steerAbsolute(factor)
-                        else:
-                            self.__steering.reset()
+                        if(bsize > 1000):
+                            if(bx < 180):
+                                factor = -1 * (0.9 / 180) * abs(180 - bx)
+                                self.__steering.steerAbsolute(factor)
+                            elif(bx > 180):
+                                factor = (0.9 / 180) * abs(180 - bx)
+                                self.__steering.steerAbsolute(factor)
+                            else:
+                                self.__steering.reset()
 
                         strOp = ('%d, %d, %d, %f, %f, %f, %f, %f, %f, %f, %f' % (
                             frame, btype, bsign, bx, by, bwidt, bheig, bsize, angle, bdist, factor))
