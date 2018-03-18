@@ -33,7 +33,7 @@ class Controller():
         self.us = Ultrasonics(self.ub)
         self.motors = Motors(self.tb, self.ub, self.tickSpeed)
         self.steering = Steering(self.tb,  self.ub, self.tickSpeed)
-        self.vision = Vision(self.steering, self.us)
+        self.vision = Vision(self.steering, self.us, self.motors)
         self.teleLogger = Telemetry("telemetry", "csv").get()
         self.mode = self.MODE_OVER_THE_RAINBOW
 
@@ -68,8 +68,8 @@ class Controller():
             if(self.mode == self.MODE_STRAIGHT_LINE_SPEED):
                 self.modeStraightLineSpeed()
             elif(self.mode == self.MODE_OVER_THE_RAINBOW):
-                self.vision.watch()
                 print("Ball ball ball ball ball")
+                self.modeOverTheRainbow()
                 # front = self.us.readFront()
                 # self.motors.move(self.us.right, self.us.front,
                 #                  self.us.left, self.us.back)
@@ -81,6 +81,8 @@ class Controller():
                 # time.sleep(self.tickSpeed)
         except KeyboardInterrupt:
             # User has pressed CTRL+C
+            self.us.ub.SetServoPosition2(0)
+
             print('Done')
             if(self.motors):
                 self.motors.shutdown()
@@ -112,6 +114,9 @@ class Controller():
                              self.us.front, self.us.back)
             self.log()
             time.sleep(self.tickSpeed)
+
+    def modeOverTheRainbow(self):
+        self.vision.seek(1)
 
 
 def main():

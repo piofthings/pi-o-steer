@@ -105,8 +105,11 @@ class Motors():
         else:
             self.logger.info('Distance moved was not read')
 
-        self.tb.SetMotor1(self.driveRight * self.speed)
-        self.tb.SetMotor2(self.driveLeft * self.speed)
+        self.move(self.driveLeft, self.driveRight, self.speed)
+
+    def move(self, dLeft, dRight, speed):
+        self.tb.SetMotor1(dLeft * speed)
+        self.tb.SetMotor2(dRight * speed)
 
     def shutdown(self):
         self.tb.MotorsOff()
