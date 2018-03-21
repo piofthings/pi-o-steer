@@ -4,9 +4,17 @@
 # Import the libraries we need
 from __future__ import division
 import time
+import math
 from references import ThunderBorg3
 from datetime import datetime
 from telemetry import Telemetry
+
+
+class Position():
+    left = 0
+    right = 0
+    speed = 0
+    timestamp = time.time()
 
 
 class Motors():
@@ -27,6 +35,9 @@ class Motors():
     minRight = 80
     steeringDefault = 0.08
     distanceMoved = 0
+
+    path = []
+    intervalToDegreeConstant = 0.20  # seconds
 
     def __init__(self, thunderBorgInstance, ultraBorgInstance, tickSpeed):
         self.tb = thunderBorgInstance
@@ -108,8 +119,56 @@ class Motors():
         self.move(self.driveLeft, self.driveRight, self.speed)
 
     def move(self, dLeft, dRight, speed):
+        pos = Position()
+        pos.left = dLeft
+        pos.right = dRight
+        pos.speed = speed
+        pos.timestamp = time.time()
+        self.path.append(pos)
         self.tb.SetMotor1(dLeft * speed)
         self.tb.SetMotor2(dRight * speed)
+
+    def rotate(self, degrees):
+        t = True
+        delay = (degrees * self.intervalToDegreeConstant) / 45
+        print('Calculated duration: ' + str(abs(delay)))
+        last_time = time.time()
+        while t:
+            # Go through each entry in the sequence in order
+            # for step in sequence:
+            # Set the first motor to the first value in the pair
+            self.tb.SetMotor1(1)
+            # Set the second motor to the second value in the pair
+            self.tb.SetMotor2(-1)
+            # print '%+.1f %+.1f' % (step[0], step[1])
+            # time.sleep(abs(delay))                   # Wait between steps
+            now = time.time()
+            if (now - last_time) > abs(delay):
+                t = False
+
+        self.tb.SetMotor1(0)
+        self.tb.SetMotor2(0)
+
+        self.tb.MotorsOff()                 # Turn both motors off
+
+    def reverse(self, percent):
+        print('Reversing')
+        startIndex = len(self.path) - 1
+        while startIndex > 0:
+            t = True
+            delay = (self.path[startIndex].timestamp -
+                     self.path[startIndex - 1].timestamp)
+            last_time = time.time()
+            while t:
+                self.tb.SetMotor1(
+                    self.path[startIndex].right * (-1) * self.path[startIndex].speed)
+                self.tb.SetMotor2(
+                    self.path[startIndex].left * (-1) * self.path[startIndex].speed)
+                now = time.time()
+                if (now - last_time) > abs(delay):
+                    t = False
+            startIndex -= 1
+            print('startIndex: ' + str(startIndex) + 'Delay: ' + str(delay))
 
     def shutdown(self):
         self.tb.MotorsOff()

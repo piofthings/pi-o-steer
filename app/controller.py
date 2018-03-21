@@ -116,7 +116,14 @@ class Controller():
             time.sleep(self.tickSpeed)
 
     def modeOverTheRainbow(self):
-        self.vision.seek(1)
+        self.vision.seek(self.vision.COLOR_RED)
+        self.motors.reverse(100)
+        self.vision.seek(self.vision.COLOR_BLUE)
+        self.motors.reverse(100)
+        # self.vision.seek(vision.COLOR_YELLOW)
+        # self.motors.reverse(100)
+        # self.vision.seek(vision.COLOR_GREEN)
+        # self.motors.reverse(100)
 
 
 def main():

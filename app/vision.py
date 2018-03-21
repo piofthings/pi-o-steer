@@ -41,14 +41,14 @@ class Vision():
         self.__motors = motors
         self.__logger = Telemetry(self.__class__.__name__, "csv").get()
         self.__minSize = 100
-        self.__maxSize = 4000
+        self.__maxSize = 10000
 
         self.__logger.info(
             'Frame, Block Type, Signature, X, Y, Width, Height, Size, Angle, Distance, Factor, MovingFor, Pan Position, Action')
         self.__objectHeight = 46  # mm
         self.__focalLength = 2.4  # mm
-        self.__minPan = -0.5
-        self.__maxPan = 0.5
+        self.__minPan = -0.95
+        self.__maxPan = 1.0
         self.__panPosition = 0
         pixy_init()
         self.__ultrasonics.ub.SetServoPosition2(0)
@@ -97,10 +97,8 @@ class Vision():
 
                             reached = False
                     else:
-                        print('color mis-match')
                         self.__motors.move(1, 1, 0)
                 else:
-                    print('data mis-match')
                     self.__motors.move(1, 1, 0)
 
                 count = pixy_get_blocks(100, blocks)
@@ -152,16 +150,34 @@ class Vision():
 
                                 self.__biggestBlockInFrame['factor'] = self.__panPosition
                                 if('factor' in self.__biggestBlockInFrame):
-                                    if(self.__biggestBlockInFrame['factor'] > 0):
+                                    factor = self.__biggestBlockInFrame['factor']
+                                    if(factor > 0):
                                         # go Left
-                                        print('going left')
-                                        self.__motors.move(1, 0.5, 0.5)
+                                        if (factor > 0.33):
+                                            # spin
+                                            print(
+                                                'spinning left @ factor:' + str(factor))
+                                            self.__motors.rotate(factor * 135)
+                                            self.__panPosition = 0
+                                            self.__ultrasonics.ub.SetServoPosition2(
+                                                self.__panPosition)
+                                        else:
+                                            # steer
+                                            self.__motors.move(1, 0.5, 0.5)
 
                                     elif(self.__biggestBlockInFrame['factor'] < 0):
                                         # goright
-                                        print('going right')
-                                        self.__motors.move(0.5, 1, 0.5)
-
+                                        if (factor < -0.33):
+                                            # spin
+                                            print(
+                                                'spinning Right @ factor:' + str(factor))
+                                            self.__motors.rotate(factor * 135)
+                                            self.__panPosition = 0
+                                            self.__ultrasonics.ub.SetServoPosition2(
+                                                self.__panPosition)
+                                        else:
+                                            # steer
+                                            self.__motors.move(0.5, 1, 0.5)
                                     else:
                                         print('going straight')
 
@@ -251,6 +267,7 @@ class Vision():
                             self.__panPosition)
                         found = False
                 frame += 1
+                time.sleep(0.01)
             except KeyboardInterrupt:
 
                 pixy_close()
