@@ -37,7 +37,7 @@ class Motors():
     distanceMoved = 0
 
     path = []
-    intervalToDegreeConstant = 0.20  # seconds
+    intervalToDegreeConstant = 0.18  # seconds
 
     def __init__(self, thunderBorgInstance, ultraBorgInstance, tickSpeed):
         self.tb = thunderBorgInstance
@@ -167,6 +167,7 @@ class Motors():
                 now = time.time()
                 if (now - last_time) > abs(delay):
                     t = False
+            del self.path[startIndex]
             startIndex -= 1
             print('startIndex: ' + str(startIndex) + 'Delay: ' + str(delay))
 

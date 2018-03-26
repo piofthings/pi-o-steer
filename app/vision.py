@@ -50,23 +50,25 @@ class Vision():
         self.__minPan = -0.95
         self.__maxPan = 1.0
         self.__panPosition = 0
+        self.__defaultPanPosition = 0
         pixy_init()
         self.__ultrasonics.ub.SetServoPosition2(0)
         self.__ultrasonics.ub.SetServoMaximum2(5000)
         self.__ultrasonics.ub.SetServoMinimum2(1000)
 
     def seek(self, colorCode):
-        self.__ultrasonics.ub.SetServoPosition2(self.__panPosition)
+        self.__ultrasonics.ub.SetServoPosition2(self.__defaultPanPosition)
         self.__ultrasonics.ub.SetServoPosition1(self.tiltPosition)
         detected = False
         frame = 0
 
         self.__panPosition = self.__maxPan
         self.__ultrasonics.ub.SetServoPosition2(self.__panPosition)
-        while 1:
+        found = True
+        while found:
             detectedInitialSize = self.search(colorCode)
             reached = self.approach(detectedInitialSize, colorCode)
-            return
+            found = False
 
     def approach(self, detectedInitialSize, colorCode):
         # TODO: Once the ball is found search and steer appropriately.
@@ -267,7 +269,7 @@ class Vision():
                             self.__panPosition)
                         found = False
                 frame += 1
-                time.sleep(0.01)
+                # time.sleep(0.01)
             except KeyboardInterrupt:
 
                 pixy_close()
