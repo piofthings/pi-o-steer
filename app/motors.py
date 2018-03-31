@@ -37,7 +37,7 @@ class Motors():
     distanceMoved = 0
 
     path = []
-    intervalToDegreeConstant = 0.18  # seconds
+    intervalToDegreeConstant = 0.22  # seconds
 
     def __init__(self, thunderBorgInstance, ultraBorgInstance, tickSpeed):
         self.tb = thunderBorgInstance
@@ -136,10 +136,12 @@ class Motors():
         while t:
             # Go through each entry in the sequence in order
             # for step in sequence:
-            # Set the first motor to the first value in the pair
-            self.tb.SetMotor1(1)
-            # Set the second motor to the second value in the pair
-            self.tb.SetMotor2(-1)
+            if degrees < 0:
+                self.tb.SetMotor1(1)
+                self.tb.SetMotor2(-1)
+            elif degrees > 0:
+                self.tb.SetMotor1(-1)
+                self.tb.SetMotor2(1)
             # print '%+.1f %+.1f' % (step[0], step[1])
             # time.sleep(abs(delay))                   # Wait between steps
             now = time.time()

@@ -1,4 +1,4 @@
-# Team Pi-o-Steer
+# Team Pi-O-Steer
 
 ## Code for a #PiWars 2018 robot
 

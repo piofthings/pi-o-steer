@@ -13,6 +13,7 @@ from motors import Motors
 from steering import Steering
 from telemetry import Telemetry
 from vision import Vision
+from vision import VisionAttributes
 
 
 class Controller():
@@ -98,32 +99,47 @@ class Controller():
         self.teleLogger.info(
             'left, front, right, back, distanceMoved, forwardSpeed, direction, steering position, ratio')
         self.steering.reset()
-        while True:
-            left = self.us.readLeft()
-            self.steering.steer(self.us.left, self.us.right,
-                                self.us.front, self.us.back)
-            self.motors.move(self.us.left, self.us.right,
-                             self.us.front, self.us.back)
-            self.log()
-            time.sleep(self.tickSpeed)
+        slVa = VisionAttributes()
+        slVa.startTiltAngle = 0.5
+        slVa.startPanAngle = 0
+        slVa.minimumArea = 100
+        slVa.maximumArea = 20000
+        slVa.minPanAngle = -0.5
+        slVa.maxPanAngle = 0.5
+        slVa.targetColorPattern = Vision.COLOR_WHITE
+        slVa.topSpeed = 1.0
+        slVa.topSpinSpeed = 1.0
 
-            right = self.us.readRight()
-            self.steering.steer(self.us.left, self.us.right,
-                                self.us.front, self.us.back)
-            self.motors.move(self.us.left, self.us.right,
-                             self.us.front, self.us.back)
-            self.log()
-            time.sleep(self.tickSpeed)
+        self.vision.tilt(0.5)
+        while True:
+
+            self.vision.initialise()
+            self.vision.seek(self.vision.COLOR_WHITE)
+            # left = self.us.readLeft()
+            # self.steering.steer(self.us.left, self.us.right,
+            #                     self.us.front, self.us.back)
+            # self.motors.move(self.us.left, self.us.right,
+            #                  self.us.front, self.us.back)
+            # self.log()
+            # time.sleep(self.tickSpeed)
+            #
+            # right = self.us.readRight()
+            # self.steering.steer(self.us.left, self.us.right,
+            #                     self.us.front, self.us.back)
+            # self.motors.move(self.us.left, self.us.right,
+            #                  self.us.front, self.us.back)
+            # self.log()
+            # time.sleep(self.tickSpeed)
 
     def modeOverTheRainbow(self):
         self.vision.seek(self.vision.COLOR_RED)
         self.motors.reverse(100)
         self.vision.seek(self.vision.COLOR_BLUE)
         self.motors.reverse(100)
-        # self.vision.seek(vision.COLOR_YELLOW)
-        # self.motors.reverse(100)
-        # self.vision.seek(vision.COLOR_GREEN)
-        # self.motors.reverse(100)
+        self.vision.seek(vision.COLOR_YELLOW)
+        self.motors.reverse(100)
+        self.vision.seek(vision.COLOR_GREEN)
+        self.motors.reverse(100)
 
 
 def main():
