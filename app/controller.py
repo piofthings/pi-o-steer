@@ -14,6 +14,7 @@ from steering import Steering
 from telemetry import Telemetry
 from vision import Vision
 from vision import VisionAttributes
+from pan_tilt_controller import PanTiltController
 
 
 class Controller():
@@ -26,6 +27,7 @@ class Controller():
     MODE_DUCK_SHOOT = 4
     MODE_OBSTACLE_COURSE = 5
     MODE_PI_NOON = 6
+    MODE_TEST = 99
 
     def __init__(self):
         self.ub.Init()
@@ -36,7 +38,9 @@ class Controller():
         self.steering = Steering(self.tb,  self.ub, self.tickSpeed)
         self.vision = Vision(self.steering, self.us, self.motors)
         self.teleLogger = Telemetry("telemetry", "csv").get()
-        self.mode = self.MODE_OVER_THE_RAINBOW
+        self.mode = self.MODE_TEST
+
+        self.ptc = PanTiltController(self.ub, 270, 135)
 
         battMin, battMax = self.tb.GetBatteryMonitoringLimits()
         battCurrent = self.tb.GetBatteryReading()
@@ -71,15 +75,43 @@ class Controller():
             elif(self.mode == self.MODE_OVER_THE_RAINBOW):
                 print("Ball ball ball ball ball")
                 self.modeOverTheRainbow()
-                # front = self.us.readFront()
-                # self.motors.move(self.us.right, self.us.front,
-                #                  self.us.left, self.us.back)
-                # time.sleep(self.tickSpeed)
+            else:
 
-                # back = self.us.readBack()
-                # self.motors.move(self.us.right, self.us.front,
-                #                  self.us.left, self.us.back)
-                # time.sleep(self.tickSpeed)
+                print('Pan -62 = ' + str(self.ptc.pan(-62)))
+                time.sleep(1)
+                print('Pan 0 = ' + str(self.ptc.pan(0)))
+                time.sleep(1)
+
+                print('Pan 62 = ' + str(self.ptc.pan(62)))
+                time.sleep(1)
+
+                print('Pan absolute 1.0 = ' + str(self.ptc.pan_absolute(1.0)))
+                time.sleep(1)
+
+                print('Pan absolute -1.0 = ' + str(self.ptc.pan_absolute(-1.0)))
+                time.sleep(1)
+
+                print('Pan absolute 0.0 = ' + str(self.ptc.pan_absolute(0.0)))
+                time.sleep(1)
+
+                print('Tilt -30 = ' + str(self.ptc.tilt(-30)))
+                time.sleep(1)
+                print('Tilt 0 = ' + str(self.ptc.tilt(0)))
+                time.sleep(1)
+
+                print('Tilt 30 = ' + str(self.ptc.tilt(30)))
+                time.sleep(1)
+
+                print('Tilt absolute 0.6 = ' + str(self.ptc.tilt_absolute(0.6)))
+                time.sleep(1)
+
+                print('Tilt absolute -0.6 = ' +
+                      str(self.ptc.tilt_absolute(-0.6)))
+                time.sleep(1)
+
+                print('Tilt absolute 0.0 = ' + str(self.ptc.tilt_absolute(0.0)))
+                time.sleep(1)
+
         except KeyboardInterrupt:
             # User has pressed CTRL+C
             self.us.ub.SetServoPosition2(0)
