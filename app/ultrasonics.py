@@ -16,26 +16,26 @@ class Position(object):
 
 
 class Ultrasonics():
-    ub = None     # Create a new UltraBorg object
+    __ub = None     # Create a new UltraBorg object
     left = 0.0
     right = 0.0
     front = 0.0
     back = 0.0
 
     def __init__(self, utraborgInstance):
-        self.ub = utraborgInstance
-        self.frontPrevious = self.ub.GetDistance2()
+        self.__ub = utraborgInstance
+        self.frontPrevious = self.__ub.GetDistance2()
         # Set the board up (checks the board is connected)
 
     def read(self):
         # Read all four ultrasonic values
-        self.right = self.ub.GetRawDistance1()
+        self.right = self.__ub.GetRawDistance1()
         time.sleep(0.05)
-        self.front = self.ub.GetRawDistance2()
+        self.front = self.__ub.GetRawDistance2()
         time.sleep(0.05)
-        self.left = self.ub.GetRawDistance3()
+        self.left = self.__ub.GetRawDistance3()
         time.sleep(0.05)
-        self.back = self.ub.GetRawDistance4()
+        self.back = self.__ub.GetRawDistance4()
         time.sleep(0.05)
         # Convert to the nearest millimeter
         self.right = int(self.right)
@@ -44,17 +44,17 @@ class Ultrasonics():
         self.back = int(self.back)
 
     def readRight(self):
-        self.right = self.ub.GetRawDistance1()
+        self.right = self.__ub.GetRawDistance1()
         return self.right
 
     def readLeft(self):
-        self.left = self.ub.GetRawDistance3()
+        self.left = self.__ub.GetRawDistance3()
         return self.left
 
     def readFront(self):
-        self.front = self.ub.GetRawDistance2()
+        self.front = self.__ub.GetRawDistance2()
         return self.left
 
     def readBack(self):
-        self.back = self.ub.GetRawDistance4()
+        self.back = self.__ub.GetRawDistance4()
         return self.back

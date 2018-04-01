@@ -12,6 +12,7 @@ from pixy import *
 from ctypes import *
 from references import UltraBorg3
 from telemetry import Telemetry
+from pan_tilt_controller import PanTiltController
 
 
 class Blocks (Structure):
@@ -36,8 +37,6 @@ class VisionAttributes():
     targetColorPattern = "1"
     topSpeed = 1.0
     topSpinSpeed = 1.0
-    panServoRate = 1.0 / 270
-    tiltServoRate = 1.0 / 135
 
     def __init__(self):
         self.startTiltAngle = 0
@@ -53,33 +52,29 @@ class Vision():
 
     __biggestBlockInFrame = dict()
 
-    def __init__(self, steering, ultrasonics, motors):
+    def __init__(self, steering, motors):
         super(Vision, self).__init__()
         self.__steering = steering
-        self.__ultrasonics = ultrasonics
         self.__motors = motors
+
         self.__logger = Telemetry(self.__class__.__name__, "csv").get()
         self.__logger.info(
             'Frame, Block Type, Signature, X, Y, Width, Height, Size, Angle, Distance, Factor, MovingFor, Pan Position, Action')
         self.__objectHeight = 46  # mm
         self.__focalLength = 2.4  # mm
         pixy_init()
-        self.__ultrasonics.ub.SetServoPosition2(0)
-        self.__ultrasonics.ub.SetServoMaximum2(5000)
-        self.__ultrasonics.ub.SetServoMinimum2(1000)
-        self.__ultrasonics.ub.SetServoPosition1(self.__tiltPosition)
 
-    def initialise(self, visionAttribs):
+    def initialise(self, visionAttribs, ptc):
         self.__visionAttributes = visionAttribs
         self.__tiltPosition = self.__visionAttributes.startTiltAngle
         self.__panPosition = self.__visionAttributes.startPanAngle
-
-    def tilt(self, absoluteTilt):
-        self.__tiltPosition = absoluteTilt
-        self.__ultrasonics.ub.SetServoPosition1(self.__tiltPosition)
+        self.__pan_tilt_controller = ptc
+        self.__pan_tilt_controller.pan_absolute(0)
+        self.__pan_tilt_controller.tilt_absolute(
+            0)
 
     def seek(self, colorCode):
-        self.__ultrasonics.ub.SetServoPosition2(self.__panPosition)
+        self.__pan_tilt_controller.pan_absolute(self.__panPosition)
         notFound = True
         while notFound:
             print("Seek Loop")
@@ -97,13 +92,13 @@ class Vision():
                     if (self.__biggestBlockInFrame['color'] == colorCode):
                         # print('color match')
 
-                        if(self.__biggestBlockInFrame['bsize'] > self.__minSize
-                           and self.__biggestBlockInFrame['bsize'] < self.__maxSize):
+                        if(self.__biggestBlockInFrame['bsize'] > self.__visionAttributes.targetMinSize
+                           and self.__biggestBlockInFrame['bsize'] < self.__visionAttributes.targetMaxSize):
                             self.__steering.steerAbsolute(0)
                         else:
                             self.__motors.move(1, 1, 0)
 
-                        if(self.__biggestBlockInFrame['bsize'] >= self.__maxSize):
+                        if(self.__biggestBlockInFrame['bsize'] >= self.__visionAttributes.targetMaxSize):
                             self.__motors.move(1, 1, 0)
 
                             reached = True
@@ -152,14 +147,14 @@ class Vision():
                                 else:
                                     panDirection = 'left'
                                 if panDirection == 'left':
-                                    self.__panPosition += self.panServoRate
-                                    if self.__panPosition > self.__maxPan:
+                                    self.__panPosition += self.__pan_tilt_controller.abs_pan_per_degree
+                                    if self.__panPosition > self.__visionAttributes.maxPanAngle:
                                         panDirection = 'right'
                                 elif panDirection == 'right':
-                                    self.__panPosition -= self.panServoRate
-                                    if self.__panPosition < self.__minPan:
+                                    self.__panPosition -= self.__pan_tilt_controller.abs_pan_per_degree
+                                    if self.__panPosition < self.__visionAttributes.minPanAngle:
                                         panDirection = 'left'
-                                self.__ultrasonics.ub.SetServoPosition2(
+                                self.__pan_tilt_controller.pan_absolute(
                                     self.__panPosition)
 
                                 self.__biggestBlockInFrame['factor'] = self.__panPosition
@@ -174,7 +169,7 @@ class Vision():
                                             self.__motors.rotate(
                                                 factor * 135 * -1)
                                             self.__panPosition = 0
-                                            self.__ultrasonics.ub.SetServoPosition2(
+                                            self.__pan_tilt_controller.pan_absolute(
                                                 self.__panPosition)
                                         else:
                                             # steer
@@ -192,7 +187,7 @@ class Vision():
                                             self.__motors.rotate(
                                                 factor * 135 * -1)
                                             self.__panPosition = 0
-                                            self.__ultrasonics.ub.SetServoPosition2(
+                                            self.__pan_tilt_controller.pan_absolute(
                                                 self.__panPosition)
                                         else:
                                             # steer
@@ -270,30 +265,34 @@ class Vision():
                                 self.__biggestBlockInFrame['bsize'] = int(
                                     bsize)
 
-                    if(self.__biggestBlockInFrame[frameKey] > self.__minSize
+                    if(self.__biggestBlockInFrame[frameKey] > self.__visionAttributes.targetMinSize
                        and ((self.__biggestBlockInFrame['bx'] + self.__biggestBlockInFrame['bwidt']) < 220)):
                         print("Found")
                         found = True
                         return self.__biggestBlockInFrame[frameKey]
                     else:
                         if panDirection == 'left':
-                            self.__panPosition += self.panServoRate
-                            if self.__panPosition > self.__maxPan:
+                            self.__panPosition += self.__pan_tilt_controller.abs_pan_per_degree
+                            if self.__panPosition > self.__visionAttributes.maxPanAngle:
                                 panDirection = 'right'
                         elif panDirection == 'right':
-                            self.__panPosition -= self.panServoRate
-                            if self.__panPosition < self.__minPan:
+                            self.__panPosition -= self.__pan_tilt_controller.abs_pan_per_degree
+                            if self.__panPosition < self.__visionAttributes.minPanAngle:
                                 panDirection = 'left'
-                        self.__ultrasonics.ub.SetServoPosition2(
+                        self.__pan_tilt_controller.pan_absolute(
                             self.__panPosition)
                         found = False
 
-                strOp = ('%d, %d, %d, %f, %f, %f, %f, %f, %f, %f, %f, %d, %f, %s' % (
-                    frame, btype, bsign, bx, by, bwidt, bheig, bsize, angle, bdist, factor, colorCode, self.__panPosition, 'searching'))
+                    strOp = ('%d, %d, %d, %f, %f, %f, %f, %f, %f, %f, %f, %d, %f, %s' % (
+                        frame, btype, bsign, bx, by, bwidt, bheig, bsize, angle, bdist, factor, colorCode, self.__panPosition, 'searching'))
 
-                self.__logger.info(strOp)
+                else:
+                    strOp = ""
+
+                if strOp != "":
+                    self.__logger.info(strOp)
                 frame += 1
-                # time.sleep(0.01)
+                time.sleep(0.01)
             except KeyboardInterrupt:
 
                 pixy_close()

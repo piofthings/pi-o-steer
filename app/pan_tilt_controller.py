@@ -14,12 +14,20 @@ class PanTiltController():
         self.__ultraborg = ultraborg_instance
         self.__max_pan_degrees = max_pan_degrees
         self.__max_tilt_degrees = max_tilt_degrees
-        self.__abs_pan_per_degree = 1 / self.__max_pan_degrees
-        self.__abs_tilt_per_degree = 1 / self.__max_tilt_degrees
+        self.abs_pan_per_degree = 1 / self.__max_pan_degrees
+        self.abs_tilt_per_degree = 1 / self.__max_tilt_degrees
+
+    def initPanServo(self, maximum, minimum):
+        self.__ultraborg.SetServoMaximum2(maximum)
+        self.__ultraborg.SetServoMinimum2(minimum)
+
+    def initTiltServo(self, maximum, minimum):
+        self.__ultraborg.SetServoMaximum1(maximum)
+        self.__ultraborg.SetServoMinimum1(minimum)
 
     def pan(self, degrees):
         if(abs(degrees) <= self.__max_pan_degrees / 2):
-            turn_absolute = self.__abs_pan_per_degree * degrees
+            turn_absolute = self.abs_pan_per_degree * degrees
             self.__ultraborg.SetServoPosition2(turn_absolute)
             return True
         else:
@@ -34,7 +42,7 @@ class PanTiltController():
 
     def tilt(self, degrees):
         if(abs(degrees) < self.__max_tilt_degrees / 2):
-            turn_absolute = self.__abs_tilt_per_degree * degrees
+            turn_absolute = self.abs_tilt_per_degree * degrees
             self.__ultraborg.SetServoPosition1(turn_absolute)
             return True
         else:

@@ -131,7 +131,8 @@ class Motors():
     def rotate(self, degrees):
         t = True
         delay = (degrees * self.intervalToDegreeConstant) / 45
-        print('Calculated duration: ' + str(abs(delay)))
+        print('Rotate Degrees: ' + str(degrees) +
+              ' Calculated duration: ' + str(abs(delay)))
         last_time = time.time()
         while t:
             # Go through each entry in the sequence in order

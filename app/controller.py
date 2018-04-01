@@ -36,9 +36,9 @@ class Controller():
         self.us = Ultrasonics(self.ub)
         self.motors = Motors(self.tb, self.ub, self.tickSpeed)
         self.steering = Steering(self.tb,  self.ub, self.tickSpeed)
-        self.vision = Vision(self.steering, self.us, self.motors)
+        self.vision = Vision(self.steering, self.motors)
         self.teleLogger = Telemetry("telemetry", "csv").get()
-        self.mode = self.MODE_TEST
+        self.mode = self.MODE_OVER_THE_RAINBOW
 
         self.ptc = PanTiltController(self.ub, 270, 135)
 
@@ -114,7 +114,7 @@ class Controller():
 
         except KeyboardInterrupt:
             # User has pressed CTRL+C
-            self.us.ub.SetServoPosition2(0)
+            self.ub.SetServoPosition2(0)
 
             print('Done')
             if(self.motors):
@@ -141,7 +141,6 @@ class Controller():
         slVa.targetColorPattern = Vision.COLOR_WHITE
         slVa.topSpeed = 1.0
         slVa.topSpinSpeed = 1.0
-
         self.vision.tilt(0.5)
         while True:
 
@@ -164,6 +163,20 @@ class Controller():
             # time.sleep(self.tickSpeed)
 
     def modeOverTheRainbow(self):
+        slVa = VisionAttributes()
+        slVa.startTiltAngle = 0.5
+        slVa.startPanAngle = -1
+        slVa.minimumArea = 100
+        slVa.maximumArea = 20000
+        slVa.minPanAngle = -1.0
+        slVa.maxPanAngle = 1.0
+        slVa.targetColorPattern = Vision.COLOR_WHITE
+        slVa.topSpeed = 1.0
+        slVa.topSpinSpeed = 1.0
+        rainbowPtc = PanTiltController(self.ub, 270, 135)
+        rainbowPtc.initPanServo(5000, 1000)
+        self.vision.initialise(slVa, rainbowPtc)
+        time.sleep(0.5)
         self.vision.seek(self.vision.COLOR_RED)
         self.motors.reverse(100)
         self.vision.seek(self.vision.COLOR_BLUE)
