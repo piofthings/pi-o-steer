@@ -128,6 +128,10 @@ class Motors():
         self.tb.SetMotor1(dLeft * speed)
         self.tb.SetMotor2(dRight * speed)
 
+    def stop(self):
+        self.tb.SetMotor1(0)
+        self.tb.SetMotor2(0)
+
     def rotate(self, degrees):
         t = True
         delay = (degrees * self.intervalToDegreeConstant) / 45

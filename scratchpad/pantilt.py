@@ -8,8 +8,8 @@ import UltraBorg3
 import time
 
 # Settings
-panServoMin = -0.5                 # Smallest servo position to use
-panServoMax = +0.5
+panServoMin = -0.90                # Smallest servo position to use
+panServoMax = +0.95
 
 tiltServoMin = -0.5
 tiltServoMax = +0.5
@@ -27,8 +27,8 @@ UB.Init()                       # Set the board up (checks the board is connecte
 try:
     print('Move to central')
     # Initial settings
-    tiltServoPosition = 0.4
-    panServoPosition = 0.0
+    tiltServoPosition = 0.05
+    panServoPosition = panServoMin
     # Set our initial servo positions
     UB.SetServoPosition1(tiltServoPosition)
     UB.SetServoPosition2(panServoPosition)

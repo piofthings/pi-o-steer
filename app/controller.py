@@ -138,14 +138,15 @@ class Controller():
         slVa.maximumArea = 20000
         slVa.minPanAngle = -0.5
         slVa.maxPanAngle = 0.5
-        slVa.targetColorPattern = Vision.COLOR_WHITE
+        slVa.targetColorPattern = Vision.COLOUR_WHITE
         slVa.topSpeed = 1.0
         slVa.topSpinSpeed = 1.0
         self.vision.tilt(0.5)
+
         while True:
 
             self.vision.initialise()
-            self.vision.seek(self.vision.COLOR_WHITE)
+            self.vision.seek(self.vision.COLOUR_WHITE)
             # left = self.us.readLeft()
             # self.steering.steer(self.us.left, self.us.right,
             #                     self.us.front, self.us.back)
@@ -164,27 +165,34 @@ class Controller():
 
     def modeOverTheRainbow(self):
         slVa = VisionAttributes()
-        slVa.startTiltAngle = 0.5
-        slVa.startPanAngle = -1
-        slVa.minimumArea = 100
-        slVa.maximumArea = 20000
+        slVa.startTiltAngle = 0.05
+        slVa.startPanAngle = -0.90
+        slVa.targetMinSize = 25
+        slVa.targetMaxSize = 1000
         slVa.minPanAngle = -1.0
         slVa.maxPanAngle = 1.0
-        slVa.targetColorPattern = Vision.COLOR_WHITE
+        slVa.targetColorPattern = Vision.COLOUR_WHITE
         slVa.topSpeed = 1.0
         slVa.topSpinSpeed = 1.0
+
+        # self.motors.move(-1, -1, 0.5)
+        # time.sleep(0.5)
+        # self.motors.stop()
+
         rainbowPtc = PanTiltController(self.ub, 270, 135)
         rainbowPtc.initPanServo(5000, 1000)
         self.vision.initialise(slVa, rainbowPtc)
         time.sleep(0.5)
-        self.vision.seek(self.vision.COLOR_RED)
-        self.motors.reverse(100)
-        self.vision.seek(self.vision.COLOR_BLUE)
-        self.motors.reverse(100)
-        self.vision.seek(vision.COLOR_YELLOW)
-        self.motors.reverse(100)
-        self.vision.seek(vision.COLOR_GREEN)
-        self.motors.reverse(100)
+
+        self.vision.scan()
+        print("Scan Complete")
+        for ball_position in self.vision.ball_positions:
+            print("Size: " + str(ball_position.size) +
+                  ', x :' + str(ball_position.x) +
+                  ', y :' + str(ball_position.y) +
+                  ', pan-position :' + str(ball_position.pan_position) +
+                  ', angle : ' + str(ball_position.pan_position * 135) +
+                  ', Colour:' + str(ball_position.colour))
 
 
 def main():

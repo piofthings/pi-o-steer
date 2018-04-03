@@ -42,15 +42,43 @@ class VisionAttributes():
         self.startTiltAngle = 0
 
 
+class BlockPosition():
+    colour = -99
+    x = -1
+    y = -1
+    width = 0
+    height = 0
+    size = 0
+    angle = 360
+    pan_position = 360
+    frame_key = 'unknown'
+
+    def __init__(self, colour=-99, framekey='unknown'):
+        self.colour = colour
+        self.frame_key = framekey
+
+
 class Vision():
     """Vision class to handle PixyCam Data"""
-    COLOR_WHITE = 7  # White
-    COLOR_RED = 2  # Red
-    COLOR_GREEN = 3  # Green
-    COLOR_YELLOW = 4  # Yellow
-    COLOR_BLUE = 5  # Blue
+    COLOUR_WHITE = 7  # White
+    COLOUR_RED = 2  # Red
+    COLOUR_BLUE = 3  # Blue
+    COLOUR_YELLOW = 4  # Yellow
+    COLOUR_GREEN = 5  # Green
+    COLOUR_UNKNOWN = -99  # Default
 
-    __biggestBlockInFrame = dict()
+    RED_TURN_POSITION = 0
+    BLUE_TURN_POSITION = 1
+    YELLOW_TURN_POSITION = 2
+    GREEN_TURN_POSITION = 3
+
+    PIXY_RES_X = 320
+    PIXY_RES_Y = 200
+
+    ball_positions = [BlockPosition(COLOUR_RED), BlockPosition(COLOUR_BLUE),
+                      BlockPosition(COLOUR_YELLOW), BlockPosition(COLOUR_GREEN)]
+
+    __biggest_block_in_frame = dict()
 
     def __init__(self, steering, motors):
         super(Vision, self).__init__()
@@ -66,39 +94,147 @@ class Vision():
 
     def initialise(self, visionAttribs, ptc):
         self.__visionAttributes = visionAttribs
-        self.__tiltPosition = self.__visionAttributes.startTiltAngle
-        self.__panPosition = self.__visionAttributes.startPanAngle
+        self.__tilt_position = self.__visionAttributes.startTiltAngle
+        self.__pan_position = self.__visionAttributes.startPanAngle
         self.__pan_tilt_controller = ptc
         self.__pan_tilt_controller.pan_absolute(0)
         self.__pan_tilt_controller.tilt_absolute(
             0)
 
-    def seek(self, colorCode):
-        self.__pan_tilt_controller.pan_absolute(self.__panPosition)
-        notFound = True
-        while notFound:
-            print("Seek Loop")
-            detectedInitialSize = self.search(colorCode)
-            reached = self.approach(detectedInitialSize, colorCode)
-            notFound = False
+    def scan(self):
+        print("self.__pan_position = " + str(self.__pan_position))
+        str(self.__pan_tilt_controller.pan_absolute(self.__pan_position))
+        str(self.__pan_tilt_controller.tilt_absolute(self.__tilt_position))
+        time.sleep(0.5)
+        not_in_view = True
+        first_colour_found = False
+        colourCode = self.COLOUR_UNKNOWN
+        colours_found = False
+        blocks = BlockArray(100)
+        frame = 0
+        strOp = ""
+        factor = False
+        while colours_found != True:
 
-    def approach(self, detectedInitialSize, colorCode):
+            try:
+                count = pixy_get_blocks(100, blocks)
+                if count > 0:
+                    first_colour_found = True
+                    frameKey = 'frame' + str(frame)
+
+                    self.__biggest_block_in_frame = BlockPosition(
+                        self.COLOUR_UNKNOWN, frameKey)
+                    for index in range(0, count):
+                        bsign = blocks[index].signature
+                        btype = blocks[index].type
+                        bx = blocks[index].x
+                        by = blocks[index].y
+                        bwidt = blocks[index].width
+                        bheig = blocks[index].height
+                        bsize = bwidt * bheig
+                        angle = blocks[index].angle
+                        bdist = (self.__objectHeight *
+                                 self.__focalLength) / bheig
+                        factor = 0
+                        if(self.__biggest_block_in_frame.size < bsize):
+                            self.__biggest_block_in_frame.size = bsize
+                            self.__biggest_block_in_frame.colour = int(
+                                bsign)
+                            self.__biggest_block_in_frame.x = int(
+                                bx)
+                            self.__biggest_block_in_frame.y = int(
+                                by)
+                            self.__biggest_block_in_frame.width = int(
+                                bwidt)
+                            self.__biggest_block_in_frame.size = int(
+                                bsize)
+                            self.__biggest_block_in_frame.pan_position = self.__pan_position
+
+                    factor = self.__update_if_better_block_position(
+                        self.__biggest_block_in_frame)
+
+                    strOp = ('%d, %d, %d, %f, %f, %f, %f, %f, %f, %f, %s, %d, %f, %s' % (
+                        frame, btype, bsign, bx, by, bwidt, bheig, bsize, angle, bdist, str(factor), colourCode, self.__pan_position, 'scanning'))
+
+                self.__pan_position = self.__pan_position + \
+                    self.__pan_tilt_controller.abs_pan_per_degree
+
+                self.__pan_tilt_controller.pan_absolute(self.__pan_position)
+                if strOp != "":
+                    self.__logger.info(strOp)
+                frame += 1
+                time.sleep(0.02)
+                colours_found = self.__all_colours_found(
+                ) and self.__pan_position > (self.__visionAttributes.maxPanAngle) * 0.95
+
+            except KeyboardInterrupt:
+                pixy_close()
+                print("Closed Pixy")
+                raise
+
+            except:
+                tb = traceback.format_exc()
+                e = sys.exc_info()[0]
+                print(tb)
+                if(self.__motors):
+                    self.__motors.shutdown()
+                raise
+
+    def __update_if_better_block_position(self, current_block_position):
+        if((current_block_position.size > self.__visionAttributes.targetMinSize)
+           and ((current_block_position.x + current_block_position.width) < 220)
+           and ((current_block_position.y > 15))
+           and ((current_block_position.y < 140))):
+
+            ball_position = self.__get_ball_position_of_colour(
+                current_block_position.colour)
+
+            x_distance_from_center = abs(
+                self.ball_positions[ball_position].x - self.PIXY_RES_X / 2)
+            new_x_distance_from_center = abs(
+                current_block_position.x - self.PIXY_RES_X / 2)
+            if(new_x_distance_from_center < x_distance_from_center):
+
+                self.ball_positions[ball_position] = current_block_position
+                return True
+            else:
+                return False
+        else:
+            return False
+
+    def __get_ball_position_of_colour(self, colour):
+        index = 0
+        for ball_position in self.ball_positions:
+            if ball_position.colour == colour:
+                return index
+            else:
+                index = index + 1
+        return -1
+
+    def __all_colours_found(self):
+
+        for ball_position in self.ball_positions:
+            if ball_position.pan_position == 360:
+                return False
+        return True
+
+    def approach(self, detectedInitialSize, colourCode):
         reached = False
         blocks = BlockArray(100)
         frame = 0
         while reached == False:
             try:
-                if('color' in self.__biggestBlockInFrame):
-                    if (self.__biggestBlockInFrame['color'] == colorCode):
-                        # print('color match')
+                if('colour' in self.__biggest_block_in_frame):
+                    if (self.__biggest_block_in_frame['colour'] == colourCode):
+                        # print('colour match')
 
-                        if(self.__biggestBlockInFrame['bsize'] > self.__visionAttributes.targetMinSize
-                           and self.__biggestBlockInFrame['bsize'] < self.__visionAttributes.targetMaxSize):
+                        if(self.__biggest_block_in_frame['bsize'] > self.__visionAttributes.targetMinSize
+                           and self.__biggest_block_in_frame['bsize'] < self.__visionAttributes.targetMaxSize):
                             self.__steering.steerAbsolute(0)
                         else:
                             self.__motors.move(1, 1, 0)
 
-                        if(self.__biggestBlockInFrame['bsize'] >= self.__visionAttributes.targetMaxSize):
+                        if(self.__biggest_block_in_frame['bsize'] >= self.__visionAttributes.targetMaxSize):
                             self.__motors.move(1, 1, 0)
 
                             reached = True
@@ -116,7 +252,7 @@ class Vision():
                     # Blocks found #
                     frameKey = 'frame' + str(frame)
 
-                    # self.__biggestBlockInFrame = {frameKey: 0}
+                    # self.__biggest_block_in_frame = {frameKey: 0}
                     for index in range(0, count):
                         bsign = blocks[index].signature
                         btype = blocks[index].type
@@ -129,37 +265,37 @@ class Vision():
                         bdist = (self.__objectHeight *
                                  self.__focalLength) / bheig
                         factor = 0
-                        if (int(bsign) == int(colorCode)):
-                            if((frameKey in self.__biggestBlockInFrame and self.__biggestBlockInFrame[frameKey] < bsize)
-                               or ((frameKey in self.__biggestBlockInFrame) == False)):
-                                self.__biggestBlockInFrame[frameKey] = bsize
-                                self.__biggestBlockInFrame['color'] = int(
+                        if (int(bsign) == int(colourCode)):
+                            if((frameKey in self.__biggest_block_in_frame and self.__biggest_block_in_frame[frameKey] < bsize)
+                               or ((frameKey in self.__biggest_block_in_frame) == False)):
+                                self.__biggest_block_in_frame[frameKey] = bsize
+                                self.__biggest_block_in_frame['colour'] = int(
                                     bsign)
-                                self.__biggestBlockInFrame['bx'] = int(
+                                self.__biggest_block_in_frame['bx'] = int(
                                     bx)
-                                self.__biggestBlockInFrame['bwidt'] = int(
+                                self.__biggest_block_in_frame['bwidt'] = int(
                                     bwidt)
-                                self.__biggestBlockInFrame['bsize'] = int(
+                                self.__biggest_block_in_frame['bsize'] = int(
                                     bsize)
 
-                                if self.__biggestBlockInFrame['bx'] > 160:
+                                if self.__biggest_block_in_frame['bx'] > 160:
                                     panDirection = 'right'
                                 else:
                                     panDirection = 'left'
                                 if panDirection == 'left':
-                                    self.__panPosition += self.__pan_tilt_controller.abs_pan_per_degree
-                                    if self.__panPosition > self.__visionAttributes.maxPanAngle:
+                                    self.__pan_position += self.__pan_tilt_controller.abs_pan_per_degree
+                                    if self.__pan_position > self.__visionAttributes.maxPanAngle:
                                         panDirection = 'right'
                                 elif panDirection == 'right':
-                                    self.__panPosition -= self.__pan_tilt_controller.abs_pan_per_degree
-                                    if self.__panPosition < self.__visionAttributes.minPanAngle:
+                                    self.__pan_position -= self.__pan_tilt_controller.abs_pan_per_degree
+                                    if self.__pan_position < self.__visionAttributes.minPanAngle:
                                         panDirection = 'left'
                                 self.__pan_tilt_controller.pan_absolute(
-                                    self.__panPosition)
+                                    self.__pan_position)
 
-                                self.__biggestBlockInFrame['factor'] = self.__panPosition
-                                if('factor' in self.__biggestBlockInFrame):
-                                    factor = self.__biggestBlockInFrame['factor']
+                                self.__biggest_block_in_frame['factor'] = self.__pan_position
+                                if('factor' in self.__biggest_block_in_frame):
+                                    factor = self.__biggest_block_in_frame['factor']
                                     if(factor > 0):
                                         # go Left
                                         if (factor > 0.33):
@@ -168,9 +304,9 @@ class Vision():
                                                 'spinning left @ factor:' + str(factor))
                                             self.__motors.rotate(
                                                 factor * 135 * -1)
-                                            self.__panPosition = 0
+                                            self.__pan_position = 0
                                             self.__pan_tilt_controller.pan_absolute(
-                                                self.__panPosition)
+                                                self.__pan_position)
                                         else:
                                             # steer
                                             factor = factor / -1
@@ -178,7 +314,7 @@ class Vision():
                                                 factor)
                                             self.__motors.move(1, 1, 1)
 
-                                    elif(self.__biggestBlockInFrame['factor'] < 0):
+                                    elif(self.__biggest_block_in_frame['factor'] < 0):
                                         # goright
                                         if (factor < -0.33):
                                             # spin
@@ -186,9 +322,9 @@ class Vision():
                                                 'spinning Right @ factor:' + str(factor))
                                             self.__motors.rotate(
                                                 factor * 135 * -1)
-                                            self.__panPosition = 0
+                                            self.__pan_position = 0
                                             self.__pan_tilt_controller.pan_absolute(
-                                                self.__panPosition)
+                                                self.__pan_position)
                                         else:
                                             # steer
                                             factor = factor / -1
@@ -205,9 +341,9 @@ class Vision():
 
                                     self.__motors.move(1, 1, 1)
                         else:
-                            self.__biggestBlockInFrame = {}
+                            self.__biggest_block_in_frame = {}
                         strOp = ('%d, %d, %d, %f, %f, %f, %f, %f, %f, %f, %f, %d, %f, %s' % (
-                            frame, btype, bsign, bx, by, bwidt, bheig, bsize, angle, bdist, factor, colorCode, self.__panPosition, 'approaching'))
+                            frame, btype, bsign, bx, by, bwidt, bheig, bsize, angle, bdist, factor, colourCode, self.__pan_position, 'approaching'))
                         self.__logger.info(strOp)
                     frame += 1
                     time.sleep(0.02)
@@ -225,7 +361,7 @@ class Vision():
                     self.__motors.shutdown()
                 raise
 
-    def search(self, colorCode):
+    def search(self, colourCode):
         found = False
         blocks = BlockArray(100)
         frame = 0
@@ -240,7 +376,7 @@ class Vision():
                     frameKey = 'frame' + str(frame)
                     # print(count)
 
-                    self.__biggestBlockInFrame = {frameKey: 0}
+                    self.__biggest_block_in_frame = {frameKey: 0}
                     for index in range(0, count):
                         bsign = blocks[index].signature
                         btype = blocks[index].type
@@ -253,38 +389,38 @@ class Vision():
                         bdist = (self.__objectHeight *
                                  self.__focalLength) / bheig
                         factor = 0
-                        if (int(bsign) == int(colorCode)):
-                            if(self.__biggestBlockInFrame[frameKey] < bsize):
-                                self.__biggestBlockInFrame[frameKey] = bsize
-                                self.__biggestBlockInFrame['color'] = int(
+                        if (int(bsign) == int(colourCode)):
+                            if(self.__biggest_block_in_frame[frameKey] < bsize):
+                                self.__biggest_block_in_frame[frameKey] = bsize
+                                self.__biggest_block_in_frame['colour'] = int(
                                     bsign)
-                                self.__biggestBlockInFrame['bx'] = int(
+                                self.__biggest_block_in_frame['bx'] = int(
                                     bx)
-                                self.__biggestBlockInFrame['bwidt'] = int(
+                                self.__biggest_block_in_frame['bwidt'] = int(
                                     bwidt)
-                                self.__biggestBlockInFrame['bsize'] = int(
+                                self.__biggest_block_in_frame['bsize'] = int(
                                     bsize)
 
-                    if(self.__biggestBlockInFrame[frameKey] > self.__visionAttributes.targetMinSize
-                       and ((self.__biggestBlockInFrame['bx'] + self.__biggestBlockInFrame['bwidt']) < 220)):
+                    if(self.__biggest_block_in_frame[frameKey] > self.__visionAttributes.targetMinSize
+                       and ((self.__biggest_block_in_frame['bx'] + self.__biggest_block_in_frame['bwidt']) < 220)):
                         print("Found")
                         found = True
-                        return self.__biggestBlockInFrame[frameKey]
+                        return self.__biggest_block_in_frame[frameKey]
                     else:
                         if panDirection == 'left':
-                            self.__panPosition += self.__pan_tilt_controller.abs_pan_per_degree
-                            if self.__panPosition > self.__visionAttributes.maxPanAngle:
+                            self.__pan_position += self.__pan_tilt_controller.abs_pan_per_degree
+                            if self.__pan_position > self.__visionAttributes.maxPanAngle:
                                 panDirection = 'right'
                         elif panDirection == 'right':
-                            self.__panPosition -= self.__pan_tilt_controller.abs_pan_per_degree
-                            if self.__panPosition < self.__visionAttributes.minPanAngle:
+                            self.__pan_position -= self.__pan_tilt_controller.abs_pan_per_degree
+                            if self.__pan_position < self.__visionAttributes.minPanAngle:
                                 panDirection = 'left'
                         self.__pan_tilt_controller.pan_absolute(
-                            self.__panPosition)
+                            self.__pan_position)
                         found = False
 
                     strOp = ('%d, %d, %d, %f, %f, %f, %f, %f, %f, %f, %f, %d, %f, %s' % (
-                        frame, btype, bsign, bx, by, bwidt, bheig, bsize, angle, bdist, factor, colorCode, self.__panPosition, 'searching'))
+                        frame, btype, bsign, bx, by, bwidt, bheig, bsize, angle, bdist, factor, colourCode, self.__pan_position, 'searching'))
 
                 else:
                     strOp = ""
