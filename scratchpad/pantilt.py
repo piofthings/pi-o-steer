@@ -27,7 +27,7 @@ UB.Init()                       # Set the board up (checks the board is connecte
 try:
     print('Move to central')
     # Initial settings
-    tiltServoPosition = 0.05
+    tiltServoPosition = 0.15
     panServoPosition = panServoMin
     # Set our initial servo positions
     UB.SetServoPosition1(tiltServoPosition)

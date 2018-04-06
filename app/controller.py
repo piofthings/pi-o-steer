@@ -165,19 +165,19 @@ class Controller():
 
     def modeOverTheRainbow(self):
         slVa = VisionAttributes()
-        slVa.startTiltAngle = 0.05
-        slVa.startPanAngle = -0.90
+        slVa.startTiltAngle = 0.16
+        slVa.startPanAngle = -1.00
         slVa.targetMinSize = 25
-        slVa.targetMaxSize = 1000
+        slVa.targetMaxSize = 2200
         slVa.minPanAngle = -1.0
         slVa.maxPanAngle = 1.0
         slVa.targetColorPattern = Vision.COLOUR_WHITE
         slVa.topSpeed = 1.0
         slVa.topSpinSpeed = 1.0
 
-        # self.motors.move(-1, -1, 0.5)
-        # time.sleep(0.5)
-        # self.motors.stop()
+        self.motors.move(-1, -1, 0.3)
+        time.sleep(0.8)
+        self.motors.stop()
 
         rainbowPtc = PanTiltController(self.ub, 270, 135)
         rainbowPtc.initPanServo(5000, 1000)
@@ -186,13 +186,22 @@ class Controller():
 
         self.vision.scan()
         print("Scan Complete")
+        index = 0
+        prev_position = 0
+
         for ball_position in self.vision.ball_positions:
+            #ball_position = self.vision.ball_positions[0]
             print("Size: " + str(ball_position.size) +
                   ', x :' + str(ball_position.x) +
                   ', y :' + str(ball_position.y) +
                   ', pan-position :' + str(ball_position.pan_position) +
                   ', angle : ' + str(ball_position.pan_position * 135) +
                   ', Colour:' + str(ball_position.colour))
+            if (index > 0):
+                prev_position = self.vision.ball_positions[index -
+                                                           1].pan_position
+            index = index + 1
+            self.vision.goto_ball_position(ball_position, prev_position)
 
 
 def main():
