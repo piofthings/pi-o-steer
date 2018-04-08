@@ -38,7 +38,7 @@ class Controller():
         self.steering = Steering(self.tb,  self.ub, self.tickSpeed)
         self.vision = Vision(self.steering, self.motors)
         self.teleLogger = Telemetry("telemetry", "csv").get()
-        self.mode = self.MODE_OVER_THE_RAINBOW
+        self.mode = self.MODE_STRAIGHT_LINE_SPEED
 
         self.ptc = PanTiltController(self.ub, 270, 135)
 
@@ -146,7 +146,7 @@ class Controller():
         while True:
 
             self.vision.initialise()
-            self.vision.seek(self.vision.COLOUR_WHITE)
+            self.vision.track(self.vision.COLOUR_WHITE)
             # left = self.us.readLeft()
             # self.steering.steer(self.us.left, self.us.right,
             #                     self.us.front, self.us.back)
@@ -165,7 +165,7 @@ class Controller():
 
     def modeOverTheRainbow(self):
         slVa = VisionAttributes()
-        slVa.startTiltAngle = 0.16
+        slVa.startTiltAngle = 0.15
         slVa.startPanAngle = -1.00
         slVa.targetMinSize = 25
         slVa.targetMaxSize = 2200

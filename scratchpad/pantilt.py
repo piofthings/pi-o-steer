@@ -8,8 +8,8 @@ import UltraBorg3
 import time
 
 # Settings
-panServoMin = -0.90                # Smallest servo position to use
-panServoMax = +0.95
+panServoMin = -1.00                # Smallest servo position to use
+panServoMax = +1.0
 
 tiltServoMin = -0.5
 tiltServoMax = +0.5
