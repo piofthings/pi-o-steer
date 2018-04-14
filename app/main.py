@@ -14,6 +14,7 @@ from steering import Steering
 from telemetry import Telemetry
 from vision import Vision
 from vision import VisionAttributes
+from straight_line_vision import StraightLineVision
 from pan_tilt_controller import PanTiltController
 
 
@@ -28,18 +29,21 @@ class Controller():
     MODE_OBSTACLE_COURSE = 5
     MODE_PI_NOON = 6
     MODE_TEST = 99
+    mode = MODE_STRAIGHT_LINE_SPEED
 
     def __init__(self):
+
         self.ub.Init()
         self.tb.Init()
+
         self.tickSpeed = 0.05
         self.us = Ultrasonics(self.ub)
         self.motors = Motors(self.tb, self.ub, self.tickSpeed)
         self.steering = Steering(self.tb,  self.ub, self.tickSpeed)
         self.vision = Vision(self.steering, self.motors)
+        self.straight_line_speed = StraightLineVision(
+            self.steering, self.motors)
         self.teleLogger = Telemetry("telemetry", "csv").get()
-        self.mode = self.MODE_STRAIGHT_LINE_SPEED
-
         self.ptc = PanTiltController(self.ub, 270, 135)
 
         battMin, battMax = self.tb.GetBatteryMonitoringLimits()
@@ -71,9 +75,10 @@ class Controller():
     def run(self):
         try:
             if(self.mode == self.MODE_STRAIGHT_LINE_SPEED):
+                print("Straight line speed")
                 self.modeStraightLineSpeed()
             elif(self.mode == self.MODE_OVER_THE_RAINBOW):
-                print("Ball ball ball ball ball")
+                print("Rainbow")
                 self.modeOverTheRainbow()
             else:
 
@@ -132,21 +137,32 @@ class Controller():
             'left, front, right, back, distanceMoved, forwardSpeed, direction, steering position, ratio')
         self.steering.reset()
         slVa = VisionAttributes()
-        slVa.startTiltAngle = 0.5
+        slVa.startTiltAngle = 0.6
         slVa.startPanAngle = 0
-        slVa.minimumArea = 100
-        slVa.maximumArea = 20000
+        slVa.targetMinSize = 1000
+        slVa.targetMaxSize = 18000
         slVa.minPanAngle = -0.5
         slVa.maxPanAngle = 0.5
         slVa.targetColorPattern = Vision.COLOUR_WHITE
-        slVa.topSpeed = 1.0
+        slVa.topSpeed = 0.5
         slVa.topSpinSpeed = 1.0
-        self.vision.tilt(0.5)
-
+        self.ptc.tilt(0.5)
+        slsPtc = PanTiltController(self.ub, 270, 135)
+        slsPtc.initPanServo(5000, 1000)
+        self.straight_line_speed.initialise(slVa, slsPtc)
+        self.motors.stop()
+        prev_block_position = None
         while True:
+            current_block_position = self.straight_line_speed.track(
+                self.straight_line_speed.COLOUR_WHITE)
+            if current_block_position != None:
+                self.straight_line_speed.goto_ball_position(
+                    current_block_position)
+                prev_block_position = current_block_position
+            else:
+                self.straight_line_speed.goto_ball_position(
+                    current_block_position)
 
-            self.vision.initialise()
-            self.vision.track(self.vision.COLOUR_WHITE)
             # left = self.us.readLeft()
             # self.steering.steer(self.us.left, self.us.right,
             #                     self.us.front, self.us.back)
@@ -165,7 +181,7 @@ class Controller():
 
     def modeOverTheRainbow(self):
         slVa = VisionAttributes()
-        slVa.startTiltAngle = 0.15
+        slVa.startTiltAngle = 0.12
         slVa.startPanAngle = -1.00
         slVa.targetMinSize = 25
         slVa.targetMaxSize = 2200
@@ -190,7 +206,7 @@ class Controller():
         prev_position = 0
 
         for ball_position in self.vision.ball_positions:
-            #ball_position = self.vision.ball_positions[0]
+            ball_position = self.vision.ball_positions[0]
             print("Size: " + str(ball_position.size) +
                   ', x :' + str(ball_position.x) +
                   ', y :' + str(ball_position.y) +

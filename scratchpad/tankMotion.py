@@ -26,7 +26,7 @@ if not TB.foundChip:
         print 'TB.i2cAddress = 0x%02X' % (boards[0])
     sys.exit()
 
-stepDelay = 0.25
+stepDelay = 0.21
 # Number of seconds between each sequence step
 
 # Loop over the sequence until the user presses CTRL+C
