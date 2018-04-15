@@ -4,6 +4,7 @@
 import time
 import sys
 import traceback
+from datetime import datetime
 
 from references import UltraBorg3
 from references import ThunderBorg3
@@ -35,14 +36,13 @@ class Main():
 
         self.ub.Init()
         self.tb.Init()
+        self.t1 = datetime.now()
 
         self.tickSpeed = 0.05
         self.us = Ultrasonics(self.ub)
         self.motors = Motors(self.tb, self.ub, self.tickSpeed)
         self.steering = Steering(self.tb,  self.ub, self.tickSpeed)
-        self.vision = Vision(self.steering, self.motors)
-        self.straight_line_speed = StraightLineVision(
-            self.steering, self.motors)
+
         self.teleLogger = Telemetry("telemetry", "csv").get()
         self.ptc = PanTiltController(self.ub, 270, 135)
 
@@ -120,7 +120,9 @@ class Main():
         except KeyboardInterrupt:
             # User has pressed CTRL+C
             self.ub.SetServoPosition2(0)
-
+            t2 = datetime.now()
+            delta = t2 - self.t1
+            print("Run complete in : " + str(delta.total_seconds()))
             print('Done')
             if(self.motors):
                 self.motors.shutdown()
@@ -133,6 +135,8 @@ class Main():
                 self.motors.shutdown()
 
     def modeStraightLineSpeed(self):
+        self.straight_line_speed = StraightLineVision(
+            self.steering, self.motors)
         self.teleLogger.info(
             'left, front, right, back, distanceMoved, forwardSpeed, direction, steering position, ratio')
         self.steering.reset()
@@ -145,7 +149,7 @@ class Main():
         slVa.maxPanAngle = 0.5
         slVa.colour = Vision.COLOUR_WHITE
         slVa.targetColorPattern = Vision.COLOUR_WHITE
-        slVa.topSpeed = 0.6
+        slVa.topSpeed = 0.7
         slVa.topSpinSpeed = 1.0
         self.ptc.tilt(0.5)
         slsPtc = PanTiltController(self.ub, 270, 135)
@@ -153,11 +157,17 @@ class Main():
         self.straight_line_speed.initialise(slVa, slsPtc)
         self.motors.stop()
         prev_block_position = None
-        while True:
-            self.straight_line_speed.track(
-                self.straight_line_speed.COLOUR_WHITE)
+        t1 = datetime.now()
+
+        self.straight_line_speed.track(
+            self.straight_line_speed.COLOUR_WHITE)
+
+        t2 = datetime.now()
+        delta = t2 - self.t1
+        print("Run complete in: " + str(delta.total_seconds()))
 
     def modeOverTheRainbow(self):
+        self.vision = Vision(self.steering, self.motors)
         slVa = VisionAttributes()
         slVa.startTiltAngle = 0.12
         slVa.startPanAngle = -1.00

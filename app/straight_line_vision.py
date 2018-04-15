@@ -112,9 +112,9 @@ class StraightLineVision():
                         action = "tracking"
 
             else:
-                status = "Size/Pos/Colour Not Matched: Looking for " + \
-                    str(self.__visionAttributes.colour) + \
+                status = "Pixy didn't get anything" + \
                     " | pan:" + pan_dir
+                found = False
 
             strOp = ('%d, %d, %d, %f, %f, %f, %f, %f, %f, %f, %s, %d, %f, %s' % (
                 frame, btype, current_block_position.colour, current_block_position.x, current_block_position.y, current_block_position.width, current_block_position.height, current_block_position.size, angle, bdist, status, colour_code, self.__pan_position, pan_dir))
@@ -122,16 +122,16 @@ class StraightLineVision():
         current_block_position.centered = centered
         return current_block_position
 
-    def __pan(self, pan_dir):
+    def __pan(self, pan_dir, steer=True):
         if pan_dir == 'left':
             self.__pan_position = self.__pan_position + \
-                self.__pan_tilt_controller.abs_pan_per_degree
+                (self.__pan_tilt_controller.abs_pan_per_degree * 2)
             if self.__pan_position > self.__visionAttributes.maxPanAngle:
                 pan_dir = 'right'
 
         elif pan_dir == 'right':
             self.__pan_position = self.__pan_position - \
-                self.__pan_tilt_controller.abs_pan_per_degree
+                (self.__pan_tilt_controller.abs_pan_per_degree * 2)
 
             if self.__pan_position < self.__visionAttributes.minPanAngle:
                 pan_dir = 'left'
@@ -141,11 +141,11 @@ class StraightLineVision():
         if (self.__pan_position < self.__visionAttributes.maxPanAngle) and (self.__pan_position > self.__visionAttributes.minPanAngle):
             self.__pan_tilt_controller.pan_absolute(
                 self.__pan_position)
-            self.__steering.steerAbsolute(
-                self.__pan_position * -3)
 
-            print('__pan_position applied to ' +
-                  str(self.__pan_position))
+            if steer == True:
+                self.__steering.steerAbsolute(
+                    self.__pan_position * -3.5)
+
         return pan_dir
 
     def dispose(self):
