@@ -53,6 +53,7 @@ class BlockPosition():
     pan_position = 360
     frame_key = 'unknown'
     factor = 0
+    centered = False
 
     def __init__(self, colour=-99, framekey='unknown'):
         self.colour = colour

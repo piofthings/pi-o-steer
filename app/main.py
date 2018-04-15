@@ -18,7 +18,7 @@ from straight_line_vision import StraightLineVision
 from pan_tilt_controller import PanTiltController
 
 
-class Controller():
+class Main():
     ub = UltraBorg3.UltraBorg()
     tb = ThunderBorg3.ThunderBorg()
     MODE_STRAIGHT_LINE_SPEED = 0
@@ -143,8 +143,9 @@ class Controller():
         slVa.targetMaxSize = 18000
         slVa.minPanAngle = -0.5
         slVa.maxPanAngle = 0.5
+        slVa.colour = Vision.COLOUR_WHITE
         slVa.targetColorPattern = Vision.COLOUR_WHITE
-        slVa.topSpeed = 0.5
+        slVa.topSpeed = 0.6
         slVa.topSpinSpeed = 1.0
         self.ptc.tilt(0.5)
         slsPtc = PanTiltController(self.ub, 270, 135)
@@ -153,31 +154,8 @@ class Controller():
         self.motors.stop()
         prev_block_position = None
         while True:
-            current_block_position = self.straight_line_speed.track(
+            self.straight_line_speed.track(
                 self.straight_line_speed.COLOUR_WHITE)
-            if current_block_position != None:
-                self.straight_line_speed.goto_ball_position(
-                    current_block_position)
-                prev_block_position = current_block_position
-            else:
-                self.straight_line_speed.goto_ball_position(
-                    current_block_position)
-
-            # left = self.us.readLeft()
-            # self.steering.steer(self.us.left, self.us.right,
-            #                     self.us.front, self.us.back)
-            # self.motors.move(self.us.left, self.us.right,
-            #                  self.us.front, self.us.back)
-            # self.log()
-            # time.sleep(self.tickSpeed)
-            #
-            # right = self.us.readRight()
-            # self.steering.steer(self.us.left, self.us.right,
-            #                     self.us.front, self.us.back)
-            # self.motors.move(self.us.left, self.us.right,
-            #                  self.us.front, self.us.back)
-            # self.log()
-            # time.sleep(self.tickSpeed)
 
     def modeOverTheRainbow(self):
         slVa = VisionAttributes()
@@ -221,7 +199,7 @@ class Controller():
 
 
 def main():
-    controller = Controller()
+    controller = Main()
     controller.run()
 
 
