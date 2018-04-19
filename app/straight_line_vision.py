@@ -51,10 +51,12 @@ class StraightLineVision():
         self.__visionAttributes = visionAttribs
         self.__tilt_position = self.__visionAttributes.startTiltAngle
         self.__pan_position = self.__visionAttributes.startPanAngle
+        self.__prev_pan_position = self.__pan_position
         self.__pan_tilt_controller = ptc
         self.__pan_tilt_controller.pan_absolute(self.__pan_position)
         self.__pan_tilt_controller.tilt_absolute(
             self.__tilt_position)
+        time.sleep(0.01)
 
     def track(self, colour_code):
         found = True
@@ -124,10 +126,11 @@ class StraightLineVision():
 
     def __pan(self, pan_dir, steer=True):
         if pan_dir == 'left':
-            self.__pan_position = self.__pan_position + \
+            new_pan_position = self.__pan_position + \
                 (self.__pan_tilt_controller.abs_pan_per_degree * 2)
             if self.__pan_position > self.__visionAttributes.maxPanAngle:
                 pan_dir = 'right'
+                self.__pan_position = 0
 
         elif pan_dir == 'right':
             self.__pan_position = self.__pan_position - \
@@ -135,6 +138,7 @@ class StraightLineVision():
 
             if self.__pan_position < self.__visionAttributes.minPanAngle:
                 pan_dir = 'left'
+                self.__pan_position = 0
         else:
             self.__pan_position = 0
 
