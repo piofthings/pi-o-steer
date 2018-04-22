@@ -26,6 +26,8 @@ try:
     # Set our initial servo positions
     UB.SetServoPosition4(servo4)
     UB.SetServoPosition3(servo4)
+    UB.SetServoPosition2(servo4)
+    UB.SetServoPosition1(servo4)
 except KeyboardInterrupt:
     # User has pressed CTRL+C
     print 'Done'

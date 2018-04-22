@@ -18,7 +18,7 @@ startupDelay = 0.5              # Delay before making the initial move
 pulseWidth = 0.01
 
 panServoRate = 2.0 / 135
-stepDelay = 0.1
+stepDelay = 0.5
 # Start the UltraBorg
 UB = UltraBorg3.UltraBorg()      # Create a new UltraBorg object
 UB.Init()                       # Set the board up (checks the board is connected)
@@ -26,7 +26,7 @@ UB.Init()                       # Set the board up (checks the board is connecte
 try:
     print('Move to central')
     # Initial settings
-    grabberInitialPosition = 0.0
+    grabberInitialPosition = -0.4
     # Set our initial servo positions
     UB.SetServoPosition3(grabberInitialPosition)
     # Wait a while to be sure the servos have caught up
@@ -34,8 +34,8 @@ try:
     n = 0
     tiltDirection = 'straight'
     panDirection = 'left'
-
-    while True:
+    kicked = False
+    while kicked != True:
         if panDirection == 'left':
             grabberInitialPosition += panServoRate
             if grabberInitialPosition > panServoMax:
@@ -45,17 +45,21 @@ try:
             if grabberInitialPosition < panServoMin:
                 panDirection = 'left'
 
-        if (grabberInitialPosition < panServoMax) and (grabberInitialPosition > panServoMin):
-            print('Pan  servo going ' + panDirection +
-                  ' at' + repr(grabberInitialPosition))
-            UB.SetServoPosition3(grabberInitialPosition)
+        # if (grabberInitialPosition < panServoMax) and (grabberInitialPosition > panServoMin):
+        #     print('Pan  servo going ' + panDirection +
+        #           ' at' + repr(grabberInitialPosition))
+        #     UB.SetServoPosition3(grabberInitialPosition)
+        UB.SetServoPosition3(-0.4)
+        time.sleep(stepDelay)
+        UB.SetServoPosition3(0.7)
+        kicked = True
 
         time.sleep(stepDelay)
 
-    UB.SetServoPosition3(0)
+    UB.SetServoPosition3(-0.4)
 
 except KeyboardInterrupt:
     # User has pressed CTRL+C
-    UB.SetServoPosition3(0)
+    UB.SetServoPosition3(-0.4)
 
     print('Done')

@@ -1,6 +1,14 @@
 #!/usr/bin/env python3
 # Original Source: https://github.com/piborg/MoveMyServo
-
+# I2C addresses in Use
+# ThunderBorg = 0x15
+# UltraBorg   = 0x36
+# Button SHIM = 0x3f
+# Scroll pHAT = 0x74
+# Enviro pHAT ADS1015 = 0x49:
+# Enviro pHAT TCS3472 = 0x29:
+# Enviro pHAT LSM303D = 0x1d:
+# Enviro pHAT BMP280  = 0x77:
 import time
 import sys
 import traceback
@@ -17,6 +25,7 @@ from vision import Vision
 from vision import VisionAttributes
 from straight_line_vision import StraightLineVision
 from pan_tilt_controller import PanTiltController
+from golf_joystick_controller import GolfJoystickController
 
 
 class Main():
@@ -82,40 +91,42 @@ class Main():
                 self.modeOverTheRainbow()
             else:
 
+                # Wait for Buttons
+
                 print('Pan -62 = ' + str(self.ptc.pan(-62)))
                 time.sleep(1)
                 print('Pan 0 = ' + str(self.ptc.pan(0)))
                 time.sleep(1)
-
-                print('Pan 62 = ' + str(self.ptc.pan(62)))
-                time.sleep(1)
-
-                print('Pan absolute 1.0 = ' + str(self.ptc.pan_absolute(1.0)))
-                time.sleep(1)
-
-                print('Pan absolute -1.0 = ' + str(self.ptc.pan_absolute(-1.0)))
-                time.sleep(1)
-
-                print('Pan absolute 0.0 = ' + str(self.ptc.pan_absolute(0.0)))
-                time.sleep(1)
-
-                print('Tilt -30 = ' + str(self.ptc.tilt(-30)))
-                time.sleep(1)
-                print('Tilt 0 = ' + str(self.ptc.tilt(0)))
-                time.sleep(1)
-
-                print('Tilt 30 = ' + str(self.ptc.tilt(30)))
-                time.sleep(1)
-
-                print('Tilt absolute 0.6 = ' + str(self.ptc.tilt_absolute(0.6)))
-                time.sleep(1)
-
-                print('Tilt absolute -0.6 = ' +
-                      str(self.ptc.tilt_absolute(-0.6)))
-                time.sleep(1)
-
-                print('Tilt absolute 0.0 = ' + str(self.ptc.tilt_absolute(0.0)))
-                time.sleep(1)
+                #
+                # print('Pan 62 = ' + str(self.ptc.pan(62)))
+                # time.sleep(1)
+                #
+                # print('Pan absolute 1.0 = ' + str(self.ptc.pan_absolute(1.0)))
+                # time.sleep(1)
+                #
+                # print('Pan absolute -1.0 = ' + str(self.ptc.pan_absolute(-1.0)))
+                # time.sleep(1)
+                #
+                # print('Pan absolute 0.0 = ' + str(self.ptc.pan_absolute(0.0)))
+                # time.sleep(1)
+                #
+                # print('Tilt -30 = ' + str(self.ptc.tilt(-30)))
+                # time.sleep(1)
+                # print('Tilt 0 = ' + str(self.ptc.tilt(0)))
+                # time.sleep(1)
+                #
+                # print('Tilt 30 = ' + str(self.ptc.tilt(30)))
+                # time.sleep(1)
+                #
+                # print('Tilt absolute 0.6 = ' + str(self.ptc.tilt_absolute(0.6)))
+                # time.sleep(1)
+                #
+                # print('Tilt absolute -0.6 = ' +
+                #       str(self.ptc.tilt_absolute(-0.6)))
+                # time.sleep(1)
+                #
+                # print('Tilt absolute 0.0 = ' + str(self.ptc.tilt_absolute(0.0)))
+                # time.sleep(1)
 
         except KeyboardInterrupt:
             # User has pressed CTRL+C
@@ -149,7 +160,7 @@ class Main():
         slVa.maxPanAngle = 0.5
         slVa.colour = Vision.COLOUR_WHITE
         slVa.targetColorPattern = Vision.COLOUR_WHITE
-        slVa.topSpeed = 0.7
+        slVa.topSpeed = 0.6
         slVa.topSpinSpeed = 1.0
         self.ptc.tilt(0.5)
         slsPtc = PanTiltController(self.ub, 270, 135)
