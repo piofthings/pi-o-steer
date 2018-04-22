@@ -121,7 +121,7 @@ class StraightLineVision():
             strOp = ('%d, %d, %d, %f, %f, %f, %f, %f, %f, %f, %s, %d, %f, %s' % (
                 frame, btype, current_block_position.colour, current_block_position.x, current_block_position.y, current_block_position.width, current_block_position.height, current_block_position.size, angle, bdist, status, colour_code, self.__pan_position, pan_dir))
             self.__logger.info(strOp)
-        current_block_position.centered = centered
+        #current_block_position.centered = centered
         return current_block_position
 
     def __pan(self, pan_dir, steer=True):
@@ -148,7 +148,7 @@ class StraightLineVision():
 
             if steer == True:
                 self.__steering.steerAbsolute(
-                    self.__pan_position * -3.5)
+                    self.__pan_position * -2.0)
 
         return pan_dir
 

@@ -25,7 +25,7 @@ from vision import Vision
 from vision import VisionAttributes
 from straight_line_vision import StraightLineVision
 from pan_tilt_controller import PanTiltController
-from golf_joystick_controller import GolfJoystickController
+#from golf_joystick_controller import GolfJoystickController
 
 
 class Main():
