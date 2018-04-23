@@ -163,7 +163,7 @@ class GolfJoystickController():
                     if hadEvent:
                         if(joystick.get_button(self.leftTrigger)):
                             print(joystick.get_button(self.leftTrigger))
-                            self.__ub.SetServoPosition3(-0.4)
+                            self.__ub.SetServoPosition3(-0.6)
                         if(joystick.get_button(self.kickButton)):
                             self.__ub.SetServoPosition3(0.7)
                         # Read axis positions (-1 to +1)

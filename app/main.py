@@ -39,7 +39,7 @@ class Main():
     MODE_OBSTACLE_COURSE = 5
     MODE_PI_NOON = 6
     MODE_TEST = 99
-    mode = MODE_STRAIGHT_LINE_SPEED
+    mode = MODE_OVER_THE_RAINBOW
 
     def __init__(self):
 
@@ -182,7 +182,7 @@ class Main():
         slVa = VisionAttributes()
         slVa.startTiltAngle = 0.12
         slVa.startPanAngle = -1.00
-        slVa.targetMinSize = 25
+        slVa.targetMinSize = 20
         slVa.targetMaxSize = 2200
         slVa.minPanAngle = -1.0
         slVa.maxPanAngle = 1.0

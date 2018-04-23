@@ -49,6 +49,14 @@ class PanTiltController():
         else:
             return False
 
+    def kick_absolute(self, value):
+        current_tilt = value
+        if((abs(value) * self.__max_tilt_degrees / 2) <= self.__max_tilt_degrees / 2):
+            self.__ultraborg.SetServoPosition1(value)
+            return True
+        else:
+            return False
+
     def tilt_absolute(self, value):
         current_tilt = value
         if((abs(value) * self.__max_tilt_degrees / 2) <= self.__max_tilt_degrees / 2):
