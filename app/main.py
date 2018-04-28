@@ -25,7 +25,7 @@ from vision import Vision
 from vision import VisionAttributes
 from straight_line_vision import StraightLineVision
 from pan_tilt_controller import PanTiltController
-#from golf_joystick_controller import GolfJoystickController
+from joystick_controller import JoystickController
 
 
 class Main():
@@ -39,7 +39,7 @@ class Main():
     MODE_OBSTACLE_COURSE = 5
     MODE_PI_NOON = 6
     MODE_TEST = 99
-    mode = MODE_OVER_THE_RAINBOW
+    mode = MODE_OBSTACLE_COURSE
 
     def __init__(self):
 
@@ -54,6 +54,7 @@ class Main():
 
         self.teleLogger = Telemetry("telemetry", "csv").get()
         self.ptc = PanTiltController(self.ub, 270, 135)
+        self.joystick_controller = JoystickController(self.tb, self.ub)
 
         battMin, battMax = self.tb.GetBatteryMonitoringLimits()
         battCurrent = self.tb.GetBatteryReading()
@@ -89,6 +90,11 @@ class Main():
             elif(self.mode == self.MODE_OVER_THE_RAINBOW):
                 print("Rainbow")
                 self.modeOverTheRainbow()
+            elif(self.mode == self.MODE_DERANGED_GOLF or
+                 self.mode == self.MODE_PI_NOON or
+                 self.mode == self.MODE_OBSTACLE_COURSE):
+                print("Joystick control: " + str(self.mode))
+                self.joystick_controller.run()
             else:
 
                 # Wait for Buttons

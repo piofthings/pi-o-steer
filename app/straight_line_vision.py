@@ -143,8 +143,8 @@ class StraightLineVision():
             self.__pan_position = 0
 
         if (self.__pan_position < self.__visionAttributes.maxPanAngle) and (self.__pan_position > self.__visionAttributes.minPanAngle):
-            self.__pan_tilt_controller.pan_absolute(
-                self.__pan_position)
+                # self.__pan_tilt_controller.pan_absolute(
+                #     self.__pan_position)
 
             if steer == True:
                 self.__steering.steerAbsolute(

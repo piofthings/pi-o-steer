@@ -2,9 +2,14 @@
 
 ## Code for a #PiWars 2018 robot
 
-Very much a work in progress... nothing really works at the moment.
+This has functional code for
+- Straight line speed
+- Obstacle Course, Pi Noon, Golf and Duck shoot using roll ball method.
 
-Includes parts of code provided by [PiBorg](https://piborg.org)
+
+Includes parts of code provided by [PiBorg](https://piborg.org) (ThunderBorg.py, ThunderBorg3.py, UltraBorg.py and UltraBorg3.py).
+
+Also has a Python 3 compiled version of PixyCam code. Pixy code is Licensed under GNU General Public License v2 (http://www.gnu.org/licenses/gpl-2.0.html).
 
 
 LICENSE
